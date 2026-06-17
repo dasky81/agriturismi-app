@@ -20,7 +20,10 @@ export default function HeaderAuth({ utente }: Props) {
 
   if (!utente) {
     return (
-      <Link href="/login" className="hover:text-[#2D6A4F] transition-colors">
+      <Link
+        href="/login"
+        className="px-4 py-1.5 rounded-full border-2 border-[#2D6A4F] text-[#2D6A4F] text-sm font-semibold hover:bg-[#2D6A4F] hover:text-white transition-colors"
+      >
         Accedi
       </Link>
     );
@@ -34,7 +37,7 @@ export default function HeaderAuth({ utente }: Props) {
       </span>
       <button
         onClick={handleEsci}
-        className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-red-600 transition-colors"
+        className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-red-600 transition-colors"
       >
         <LogOut size={14} />
         Esci

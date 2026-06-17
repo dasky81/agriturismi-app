@@ -47,3 +47,29 @@ body {
 /* Stili toolbar editor Tiptap */
 .tiptap-toolbar button { transition: background-color 0.15s; }
 .tiptap-toolbar button.is-active { background-color: #2D6A4F; color: white; }
+
+/* ── Design system agriturismi.app ───────────────────────── */
+:root {
+  --verde-bosco:  #1B4332;
+  --verde-medio:  #2D6A4F;
+  --verde-chiaro: #52B788;
+  --ocra:         #D4A017;
+  --crema:        #FAFAF7;
+}
+
+/* Font serif per titoli */
+.font-display { font-family: Georgia, 'Times New Roman', serif; }
+
+/* Nav link con underline animato */
+.nav-link { position: relative; }
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--verde-medio);
+  transition: width 0.25s ease;
+}
+.nav-link:hover::after { width: 100%; }
