@@ -35,7 +35,21 @@ export interface Post {
   id: string;
   slug: string;
   titolo: string;
-  contenuto: string;
-  autore_id: string;
+  contenuto: string | null;
+  excerpt: string | null;
+  cover_url: string | null;
+  autore_id: string | null;
+  agriturismo_id: string | null;
+  tags: string[];
   pubblicato: boolean;
+  og_title: string | null;
+  og_description: string | null;
+  og_image: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PostConAutore extends Post {
+  autore: { nome: string | null; cognome: string | null } | null;
+  agriturismo: { id: string; slug: string; nome: string; regione: string | null } | null;
 }
