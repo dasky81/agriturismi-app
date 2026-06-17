@@ -2,14 +2,26 @@ export interface Agriturismo {
   id: string;
   slug: string;
   nome: string;
-  descrizione: string;
-  regione: string;
-  provincia: string;
-  comune: string;
-  lat: number;
-  lng: number;
+  descrizione: string | null;
+  descrizione_ai: string | null;
+  regione: string | null;
+  provincia: string | null;
+  comune: string | null;
+  indirizzo: string | null;
+  lat: number | null;
+  lng: number | null;
+  telefono: string | null;
+  email: string | null;
+  sito_web: string | null;
+  foto_principale: string | null;
+  gallery: string[];
   servizi: string[];
-  foto: string[];
+  tipo_ospitalita: string[];
+  proprietario_id: string | null;
+  verificato: boolean;
+  attivo: boolean;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Profilo {
