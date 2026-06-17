@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, MapPin, Tag, Home, Star } from "lucide-react";
+import { Search, Loader2, MapPin, Tag, Home as HomeIcon, Star } from "lucide-react";
 import type { FiltriRicerca } from "@/lib/claude";
 
 type StatoRicerca = "inattivo" | "caricamento" | "completato" | "errore";
@@ -47,22 +47,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: "#FAFAFA" }}>
-      {/* Header */}
-      <header className="w-full py-4 px-6 border-b border-gray-100 bg-white">
-        <div className="max-w-5xl mx-auto flex items-center justify-between">
-          <span className="text-xl font-bold tracking-tight" style={{ color: "#2D6A4F" }}>
-            agriturismi.app
-          </span>
-          <nav className="hidden sm:flex gap-6 text-sm font-medium text-gray-600">
-            <a href="#" className="hover:text-[#2D6A4F] transition-colors">Esplora</a>
-            <a href="#" className="hover:text-[#2D6A4F] transition-colors">Blog</a>
-            <a href="#" className="hover:text-[#2D6A4F] transition-colors">Accedi</a>
-          </nav>
-        </div>
-      </header>
-
-      {/* Hero */}
+    <>
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-16 sm:py-24">
         <div className="w-full max-w-2xl flex flex-col items-center gap-8">
           <div className="text-center flex flex-col gap-4">
@@ -169,7 +154,7 @@ export default function HomePage() {
 
                 {filtri.tipo_ospitalita.length > 0 && (
                   <div className="flex items-start gap-3">
-                    <Home size={16} className="shrink-0 mt-0.5" style={{ color: "#2D6A4F" }} />
+                    <HomeIcon size={16} className="shrink-0 mt-0.5" style={{ color: "#2D6A4F" }} />
                     <div className="flex flex-wrap gap-2">
                       {filtri.tipo_ospitalita.map((tipo) => (
                         <span
@@ -228,10 +213,9 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="py-6 text-center text-sm text-gray-400">
         © 2026 agriturismi.app — Tutti i diritti riservati
       </footer>
-    </div>
+    </>
   );
 }
