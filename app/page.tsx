@@ -42,12 +42,12 @@ const COME_FUNZIONA = [
 ];
 
 const REGIONI = [
-  { nome: "Toscana", emoji: "🌻", colore: "#C8733A", query: "Agriturismi in Toscana" },
-  { nome: "Umbria", emoji: "🫒", colore: "#5C7A2F", query: "Agriturismi in Umbria" },
-  { nome: "Sicilia", emoji: "🍋", colore: "#C9A227", query: "Agriturismi in Sicilia" },
-  { nome: "Puglia", emoji: "🏺", colore: "#B8732C", query: "Agriturismi in Puglia" },
-  { nome: "Piemonte", emoji: "🍇", colore: "#7A4C8C", query: "Agriturismi in Piemonte" },
-  { nome: "Veneto", emoji: "🍾", colore: "#3D7C8C", query: "Agriturismi in Veneto" },
+  { nome: "Toscana",  emoji: "🌻", sfondo: "#FEF3C7", bordo: "#FCD34D", query: "Agriturismi in Toscana" },
+  { nome: "Umbria",   emoji: "🫒", sfondo: "#DCFCE7", bordo: "#86EFAC", query: "Agriturismi in Umbria" },
+  { nome: "Sicilia",  emoji: "🍋", sfondo: "#FEE2E2", bordo: "#FCA5A5", query: "Agriturismi in Sicilia" },
+  { nome: "Puglia",   emoji: "🏺", sfondo: "#FEF9C3", bordo: "#FDE047", query: "Agriturismi in Puglia" },
+  { nome: "Piemonte", emoji: "🍇", sfondo: "#EDE9FE", bordo: "#C4B5FD", query: "Agriturismi in Piemonte" },
+  { nome: "Veneto",   emoji: "🍾", sfondo: "#DBEAFE", bordo: "#93C5FD", query: "Agriturismi in Veneto" },
 ];
 
 export default function HomePage() {
@@ -112,7 +112,8 @@ export default function HomePage() {
           <h1
             className="font-display text-5xl sm:text-6xl font-bold text-white leading-tight mb-5"
           >
-            Trova il tuo angolo<br />d&apos;Italia
+            Trova il tuo angolo{" "}
+            <span className="whitespace-nowrap">d&rsquo;Italia</span>
           </h1>
           <p className="text-white/70 text-lg sm:text-xl mb-10 max-w-xl mx-auto leading-relaxed">
             Descrivi la vacanza che sogni, l&apos;AI trova l&apos;agriturismo perfetto per te
@@ -140,7 +141,7 @@ export default function HomePage() {
               type="submit"
               disabled={stato === "caricamento" || !query.trim()}
               className="px-6 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center gap-2 shrink-0"
-              style={{ backgroundColor: "#1B4332" }}
+              style={{ backgroundColor: "#2D6A4F" }}
             >
               {stato === "caricamento" ? (
                 <>
@@ -330,8 +331,8 @@ export default function HomePage() {
                 onClick={() => handleRegione(r.query)}
                 className="group relative flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
                 style={{
-                  background: `linear-gradient(135deg, ${r.colore}14 0%, ${r.colore}07 100%)`,
-                  borderColor: `${r.colore}30`,
+                  backgroundColor: r.sfondo,
+                  borderColor: r.bordo,
                 }}
               >
                 <span className="text-4xl group-hover:scale-110 transition-transform duration-300">
