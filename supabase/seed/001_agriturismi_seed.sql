@@ -7,7 +7,7 @@
 insert into agriturismi
   (slug, nome, descrizione, regione, provincia, comune, indirizzo,
    lat, lng, telefono, email,
-   servizi, tipo_ospitalita, verificato, attivo)
+   servizi, tipo_ospitalita, descrizione_ai, verificato, attivo)
 values
 
 -- ============================================================
@@ -27,6 +27,7 @@ values
   '+39 0577 355412', 'info@poderebelvedere-chianti.it',
   ARRAY['piscina', 'ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'trekking'],
   ARRAY['B&B', 'appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -43,6 +44,7 @@ values
   '+39 055 853247', 'soggiorni@fattoriacollealtO.it',
   ARRAY['Wi-Fi', 'parcheggio', 'animali ammessi', 'trekking', 'degustazione vini'],
   ARRAY['appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -59,6 +61,7 @@ values
   '+39 0578 716389', 'booking@tenutasanbiagio.it',
   ARRAY['piscina', 'ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'spa'],
   ARRAY['appartamento', 'B&B'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -79,6 +82,7 @@ values
   '+39 075 8155304', 'info@cascinasanteremo.it',
   ARRAY['ristorante', 'Wi-Fi', 'parcheggio', 'trekking', 'animali ammessi'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -95,6 +99,7 @@ values
   '+39 0763 344892', 'soggiorno@ilborgodellarupe.it',
   ARRAY['piscina', 'ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini'],
   ARRAY['appartamento', 'glamping'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -111,6 +116,7 @@ values
   '+39 0743 221567', 'info@fontequercia.it',
   ARRAY['parcheggio', 'Wi-Fi', 'animali ammessi', 'trekking', 'maneggio', 'area giochi bambini'],
   ARRAY['appartamento', 'B&B'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -131,6 +137,7 @@ values
   '+39 0922 403281', 'info@masseriavalledoro.it',
   ARRAY['piscina', 'ristorante', 'Wi-Fi', 'parcheggio', 'trekking'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -147,6 +154,7 @@ values
   '+39 095 7082319', 'vini@ilfeudoetna.it',
   ARRAY['Wi-Fi', 'parcheggio', 'degustazione vini', 'trekking', 'animali ammessi'],
   ARRAY['B&B', 'appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -163,6 +171,7 @@ values
   '+39 0923 733056', 'booking@bagliotramonto.it',
   ARRAY['ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'piscina'],
   ARRAY['B&B', 'glamping'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -183,6 +192,7 @@ values
   '+39 080 4321987', 'info@trulliselvatici.it',
   ARRAY['piscina', 'Wi-Fi', 'parcheggio', 'animali ammessi', 'area giochi bambini', 'ristorante'],
   ARRAY['B&B', 'appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -199,6 +209,7 @@ values
   '+39 0831 303142', 'soggiorno@ostuni-bianca.it',
   ARRAY['piscina', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'animali ammessi'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -215,6 +226,7 @@ values
   '+39 0832 602788', 'info@ilfrantoisalento.it',
   ARRAY['ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'piscina', 'area giochi bambini'],
   ARRAY['appartamento', 'B&B'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -235,6 +247,7 @@ values
   '+39 0761 626034', 'info@colleetrusco.it',
   ARRAY['ristorante', 'Wi-Fi', 'parcheggio', 'trekking', 'spa', 'animali ammessi'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -251,6 +264,7 @@ values
   '+39 0765 203451', 'prenotazioni@tenutasabina.it',
   ARRAY['parcheggio', 'Wi-Fi', 'trekking', 'animali ammessi', 'area giochi bambini'],
   ARRAY['appartamento', 'B&B'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -271,6 +285,7 @@ values
   '+39 0173 613278', 'info@cascinalanghe.it',
   ARRAY['ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini', 'trekking'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -287,6 +302,7 @@ values
   '+39 0141 722093', 'booking@vignetonizza.it',
   ARRAY['Wi-Fi', 'parcheggio', 'degustazione vini', 'ristorante', 'animali ammessi'],
   ARRAY['B&B', 'appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -303,6 +319,7 @@ values
   '+39 0171 999034', 'info@agriturismovallemaira.it',
   ARRAY['parcheggio', 'trekking', 'animali ammessi', 'maneggio', 'area giochi bambini'],
   ARRAY['glamping', 'B&B'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -323,6 +340,7 @@ values
   '+39 045 7500312', 'info@villarosettavalpolicella.it',
   ARRAY['piscina', 'ristorante', 'Wi-Fi', 'parcheggio', 'degustazione vini'],
   ARRAY['B&B', 'appartamento'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -339,6 +357,7 @@ values
   '+39 049 9130215', 'prenotazioni@agriturismoeuganei.it',
   ARRAY['Wi-Fi', 'parcheggio', 'degustazione vini', 'trekking', 'spa', 'animali ammessi'],
   ARRAY['B&B', 'camera'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 ),
 
@@ -355,5 +374,6 @@ values
   '+39 0423 952176', 'info@podereasolano.it',
   ARRAY['Wi-Fi', 'parcheggio', 'trekking', 'degustazione vini', 'animali ammessi', 'area giochi bambini'],
   ARRAY['appartamento', 'glamping'],
+  'Scheda generata da fonti pubbliche. Il gestore può rivendicarla per completarla.',
   false, true
 );

@@ -96,11 +96,16 @@ export default async function SchedaAgriturismo({ params }: Params) {
           />
         ) : (
           <div
-            className="absolute inset-0"
+            className="absolute inset-0 flex flex-col items-center justify-center gap-3"
             style={{
-              background: "linear-gradient(135deg, #2D6A4F 0%, #52B788 100%)",
+              background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #52B788 100%)",
             }}
-          />
+          >
+            <span className="text-7xl opacity-20 select-none">🌿</span>
+            <span className="text-white/40 text-sm font-medium select-none">
+              Foto non ancora disponibile
+            </span>
+          </div>
         )}
         {/* Overlay gradiente */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
@@ -128,6 +133,24 @@ export default async function SchedaAgriturismo({ params }: Params) {
           </div>
         </div>
       </div>
+
+      {/* ── BANNER SCHEDA NON RIVENDICATA ─────────────────────────── */}
+      {!agriturismo.verificato && (
+        <div className="bg-gray-50 border-b border-gray-100 py-2.5 px-4">
+          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <p className="text-xs text-gray-400">
+              ⚑ Scheda informativa non rivendicata — i dati provengono da fonti pubbliche e potrebbero non essere aggiornati.
+            </p>
+            <a
+              href={`/rivendica-scheda?slug=${agriturismo.slug}`}
+              className="text-xs font-semibold underline underline-offset-2 shrink-0 transition-colors"
+              style={{ color: "#2D6A4F" }}
+            >
+              Sei il titolare? Rivendica gratuitamente la scheda →
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* ── CONTENUTO ─────────────────────────────────────────────── */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
