@@ -145,16 +145,6 @@ export default async function BlogPage() {
         )}
       </main>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────── */}
-      <footer
-        className="py-8 text-center text-sm border-t border-gray-100"
-        style={{ backgroundColor: "#FAFAF7", color: "#9CA3AF" }}
-      >
-        © 2026 agriturismi.app —{" "}
-        <Link href="/" className="hover:text-[#2D6A4F] transition-colors">
-          Torna alla ricerca
-        </Link>
-      </footer>
     </div>
   );
 }

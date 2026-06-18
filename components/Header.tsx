@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { creaClientServer } from "@/lib/supabase-server";
 import HeaderAuth from "./HeaderAuth";
+import HeaderSearch from "./HeaderSearch";
 
 export default async function Header() {
   const supabase = await creaClientServer();
@@ -19,17 +20,12 @@ export default async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-100 bg-white/90 backdrop-blur-md">
-      <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5 shrink-0">
-          <svg
-            width="30"
-            height="30"
-            viewBox="0 0 30 30"
-            fill="none"
-            aria-hidden="true"
-          >
+    <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-md" style={{ borderColor: "#DDDDDD" }}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
+
+        {/* ── LOGO ─────────────────────────────────────────────── */}
+        <Link href="/" className="flex items-center gap-2 shrink-0">
+          <svg width="28" height="28" viewBox="0 0 30 30" fill="none" aria-hidden="true">
             <path
               d="M15 2C15 2 5 9 5 18C5 23.5 9.5 28 15 28C20.5 28 25 23.5 25 18C25 9 15 2 15 2Z"
               fill="#2D6A4F"
@@ -47,30 +43,18 @@ export default async function Header() {
               strokeLinecap="round"
             />
           </svg>
-          <span
-            className="text-lg font-bold tracking-tight"
-            style={{ color: "#1B4332", fontFamily: "Georgia, serif" }}
-          >
+          <span className="text-base font-bold tracking-tight text-gray-900 hidden sm:block">
             agriturismi.app
           </span>
         </Link>
 
-        {/* Nav */}
-        <nav className="hidden sm:flex items-center gap-7 text-sm font-medium text-gray-600">
-          <Link
-            href="/"
-            className="nav-link hover:text-[#2D6A4F] transition-colors py-1"
-          >
-            Esplora
-          </Link>
-          <Link
-            href="/blog"
-            className="nav-link hover:text-[#2D6A4F] transition-colors py-1"
-          >
-            Blog
-          </Link>
-          <HeaderAuth utente={user ? { nome } : null} />
-        </nav>
+        {/* ── BARRA RICERCA CENTRALE ────────────────────────── */}
+        <div className="flex-1 flex justify-center">
+          <HeaderSearch />
+        </div>
+
+        {/* ── AUTH DESTRA ──────────────────────────────────── */}
+        <HeaderAuth utente={user ? { nome } : null} />
       </div>
     </header>
   );

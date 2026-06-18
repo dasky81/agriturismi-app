@@ -187,43 +187,6 @@ export default async function PaginaSEO({ config }: Props) {
         </section>
       )}
 
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer style={{ backgroundColor: "#1B4332" }}>
-        <div className="max-w-5xl mx-auto px-6 py-10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
-            <div>
-              <p className="font-display text-xl font-bold text-white mb-1">
-                agriturismi.app
-              </p>
-              <p className="text-white/50 text-sm">
-                Il motore di ricerca AI per gli agriturismi italiani.
-              </p>
-            </div>
-            <nav className="flex flex-wrap gap-x-6 gap-y-2">
-              {[
-                { href: "/", label: "Esplora" },
-                { href: "/blog", label: "Blog" },
-                { href: "/login", label: "Accedi" },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="text-sm text-white/60 hover:text-white transition-colors"
-                >
-                  {label}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div
-            className="mt-8 pt-6 border-t text-xs text-white/35 flex flex-col sm:flex-row justify-between gap-2"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-          >
-            <span>© 2026 agriturismi.app — Tutti i diritti riservati</span>
-            <span>Made in Italy 🇮🇹</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }

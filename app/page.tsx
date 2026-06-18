@@ -1,65 +1,90 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Search,
-  Loader2,
-  MapPin,
-  Tag,
-  Home as HomeIcon,
-  Star,
-  MessageSquare,
-  Sparkles,
-} from "lucide-react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { Search, Loader2, Sparkles, X } from "lucide-react";
+import AgriCard from "@/components/AgriCard";
+import { creaClientBrowser } from "@/lib/supabase";
 import type { FiltriRicerca } from "@/lib/claude";
+import type { Agriturismo } from "@/types";
 
-type StatoRicerca = "inattivo" | "caricamento" | "completato" | "errore";
+// ── Categorie tab ──────────────────────────────────────────────
+type TipoFiltro = "all" | "regione" | "regioni" | "servizio";
 
-const SUGGERIMENTI = [
-  "Agriturismo con piscina in Toscana",
-  "Fattoria didattica per bambini",
-  "Degustazione vini in Sicilia",
-  "B&B biologico in Umbria",
+interface Categoria {
+  id: string;
+  label: string;
+  emoji: string;
+  tipo: TipoFiltro;
+  valore?: string;
+  valori?: string[];
+}
+
+const CATEGORIE: Categoria[] = [
+  { id: "all",      label: "Tutti",    emoji: "🌿", tipo: "all" },
+  { id: "toscana",  label: "Toscana",  emoji: "🌻", tipo: "regione",  valore: "Toscana" },
+  { id: "umbria",   label: "Umbria",   emoji: "🫒", tipo: "regione",  valore: "Umbria" },
+  { id: "sicilia",  label: "Sicilia",  emoji: "🍋", tipo: "regione",  valore: "Sicilia" },
+  { id: "puglia",   label: "Puglia",   emoji: "🏺", tipo: "regione",  valore: "Puglia" },
+  { id: "piemonte", label: "Piemonte", emoji: "🍇", tipo: "regione",  valore: "Piemonte" },
+  { id: "veneto",   label: "Veneto",   emoji: "🍾", tipo: "regione",  valore: "Veneto" },
+  { id: "mare",     label: "Mare",     emoji: "🌊", tipo: "regioni",  valori: ["Sicilia", "Puglia", "Sardegna", "Campania"] },
+  { id: "famiglie", label: "Famiglie", emoji: "👨‍👩‍👧", tipo: "servizio", valore: "area giochi bambini" },
+  { id: "vino",     label: "Vino",     emoji: "🍷", tipo: "servizio", valore: "degustazione vini" },
+  { id: "maneggio", label: "Maneggio", emoji: "🐴", tipo: "servizio", valore: "maneggio" },
 ];
 
-const COME_FUNZIONA = [
-  {
-    icona: <MessageSquare size={28} strokeWidth={1.5} />,
-    titolo: "Descrivi la tua vacanza",
-    desc: "Scrivi in modo naturale cosa cerchi: la regione, i servizi, il tipo di esperienza che sogni.",
-  },
-  {
-    icona: <Sparkles size={28} strokeWidth={1.5} />,
-    titolo: "L'AI interpreta",
-    desc: "Il nostro motore analizza la tua richiesta e individua i filtri più rilevanti in pochi secondi.",
-  },
-  {
-    icona: <MapPin size={28} strokeWidth={1.5} />,
-    titolo: "Trova il perfetto",
-    desc: "Ottieni una selezione di agriturismi su misura, pronti da esplorare con un click.",
-  },
-];
+// ── Homepage interna (legge searchParams) ──────────────────────
+function HomeInterna() {
+  const searchParams = useSearchParams();
+  const queryIniziale = searchParams.get("q") ?? "";
 
-const REGIONI = [
-  { nome: "Toscana",  emoji: "🌻", sfondo: "#FEF3C7", bordo: "#FCD34D", query: "Agriturismi in Toscana" },
-  { nome: "Umbria",   emoji: "🫒", sfondo: "#DCFCE7", bordo: "#86EFAC", query: "Agriturismi in Umbria" },
-  { nome: "Sicilia",  emoji: "🍋", sfondo: "#FEE2E2", bordo: "#FCA5A5", query: "Agriturismi in Sicilia" },
-  { nome: "Puglia",   emoji: "🏺", sfondo: "#FEF9C3", bordo: "#FDE047", query: "Agriturismi in Puglia" },
-  { nome: "Piemonte", emoji: "🍇", sfondo: "#EDE9FE", bordo: "#C4B5FD", query: "Agriturismi in Piemonte" },
-  { nome: "Veneto",   emoji: "🍾", sfondo: "#DBEAFE", bordo: "#93C5FD", query: "Agriturismi in Veneto" },
-];
-
-export default function HomePage() {
-  const [query, setQuery] = useState("");
-  const [stato, setStato] = useState<StatoRicerca>("inattivo");
-  const [filtri, setFiltri] = useState<FiltriRicerca | null>(null);
+  const [categoriaAttiva, setCategoriaAttiva] = useState<Categoria>(CATEGORIE[0]);
+  const [agriturismi, setAgriturismi] = useState<Agriturismo[]>([]);
+  const [caricandoGrid, setCaricandoGrid] = useState(true);
+  const [mostraAI, setMostraAI] = useState(!!queryIniziale);
+  const [queryAI, setQueryAI] = useState(queryIniziale);
+  const [caricandoAI, setCaricandoAI] = useState(false);
   const [messaggioErrore, setMessaggioErrore] = useState("");
 
-  async function cercaQuery(q: string) {
+  const supabase = creaClientBrowser();
+
+  const caricaPerCategoria = useCallback(
+    async (cat: Categoria) => {
+      setCaricandoGrid(true);
+      let query = supabase.from("agriturismi").select("*").eq("attivo", true);
+
+      if (cat.tipo === "regione" && cat.valore) {
+        query = query.eq("regione", cat.valore);
+      } else if (cat.tipo === "regioni" && cat.valori) {
+        query = query.in("regione", cat.valori);
+      } else if (cat.tipo === "servizio" && cat.valore) {
+        query = query.contains("servizi", [cat.valore]);
+      }
+
+      const { data } = await query.limit(24);
+      setAgriturismi((data ?? []) as Agriturismo[]);
+      setCaricandoGrid(false);
+    },
+    [supabase]
+  );
+
+  // Carica grid al cambio categoria
+  useEffect(() => {
+    void caricaPerCategoria(categoriaAttiva);
+  }, [categoriaAttiva, caricaPerCategoria]);
+
+  // Se c'è query iniziale dall'header, avvia ricerca AI
+  useEffect(() => {
+    if (queryIniziale) {
+      void cercaConAI(queryIniziale);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function cercaConAI(q: string) {
     if (!q.trim()) return;
-    setStato("caricamento");
-    setFiltri(null);
+    setCaricandoAI(true);
     setMessaggioErrore("");
     try {
       const risposta = await fetch("/api/ricerca", {
@@ -69,330 +94,175 @@ export default function HomePage() {
       });
       if (!risposta.ok) throw new Error(`Errore ${risposta.status}`);
       const dati = (await risposta.json()) as { filtri: FiltriRicerca };
-      setFiltri(dati.filtri);
-      setStato("completato");
+      const filtri = dati.filtri;
+
+      // Costruisci query Supabase dai filtri AI
+      setCaricandoGrid(true);
+      let query = supabase.from("agriturismi").select("*").eq("attivo", true);
+      if (filtri.regione) query = query.ilike("regione", filtri.regione);
+      else if (filtri.provincia) query = query.ilike("provincia", filtri.provincia);
+      if (filtri.servizi.length > 0) query = query.overlaps("servizi", filtri.servizi);
+      if (filtri.tipo_ospitalita.length > 0) query = query.overlaps("tipo_ospitalita", filtri.tipo_ospitalita);
+      const { data } = await query.limit(24);
+      setAgriturismi((data ?? []) as Agriturismo[]);
+      setCaricandoGrid(false);
     } catch {
       setMessaggioErrore("Si è verificato un errore. Riprova.");
-      setStato("errore");
+    } finally {
+      setCaricandoAI(false);
     }
   }
 
-  function handleCerca(e: React.FormEvent<HTMLFormElement>) {
+  function handleAISubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    void cercaQuery(query);
+    void cercaConAI(queryAI);
   }
 
-  function handleSuggerimento(testo: string) {
-    setQuery(testo);
-    setFiltri(null);
-    setStato("inattivo");
-  }
-
-  function handleRegione(q: string) {
-    setQuery(q);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-    void cercaQuery(q);
+  function chiudiAI() {
+    setMostraAI(false);
+    setQueryAI("");
+    setMessaggioErrore("");
+    void caricaPerCategoria(categoriaAttiva);
   }
 
   return (
-    <div className="flex flex-col flex-1">
-      {/* ── HERO ─────────────────────────────────────────────────── */}
-      <section
-        style={{
-          background: "linear-gradient(160deg, #1B4332 0%, #2D6A4F 100%)",
-        }}
-      >
-        <div className="max-w-3xl mx-auto px-4 pt-20 pb-16 sm:pt-28 sm:pb-20 text-center">
-          {/* Eyebrow */}
-          <p className="text-[#52B788] text-sm font-semibold uppercase tracking-widest mb-4">
-            Motore di ricerca AI · Agriturismi italiani
-          </p>
+    <div className="flex flex-col flex-1 bg-white">
 
-          {/* Titolo */}
-          <h1
-            className="font-display text-5xl sm:text-6xl font-bold text-white leading-tight mb-5"
-          >
-            Trova il tuo angolo{" "}
-            <span className="whitespace-nowrap">d&rsquo;Italia</span>
-          </h1>
-          <p className="text-white/70 text-lg sm:text-xl mb-10 max-w-xl mx-auto leading-relaxed">
-            Descrivi la vacanza che sogni, l&apos;AI trova l&apos;agriturismo perfetto per te
-          </p>
-
-          {/* Barra ricerca */}
-          <form
-            onSubmit={handleCerca}
-            className="bg-white rounded-2xl shadow-2xl p-2 flex gap-2 max-w-2xl mx-auto"
-          >
-            <div className="relative flex-1 min-w-0">
-              <Search
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 shrink-0"
-                size={18}
-              />
-              <input
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="es. Agriturismo con piscina in Toscana per famiglie..."
-                className="w-full pl-11 pr-3 py-3.5 rounded-xl text-gray-800 text-sm bg-transparent focus:outline-none placeholder:text-gray-400"
-              />
-            </div>
-            <button
-              type="submit"
-              disabled={stato === "caricamento" || !query.trim()}
-              className="px-6 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center gap-2 shrink-0"
-              style={{ backgroundColor: "#2D6A4F" }}
-            >
-              {stato === "caricamento" ? (
-                <>
-                  <Loader2 size={15} className="animate-spin" />
-                  Analisi...
-                </>
-              ) : (
-                "Cerca"
-              )}
-            </button>
-          </form>
-
-          {/* Suggerimenti */}
-          <div className="flex flex-wrap justify-center gap-2 mt-6">
-            {SUGGERIMENTI.map((s) => (
+      {/* ── CATEGORIA TABS ──────────────────────────────────────── */}
+      <div className="border-b sticky top-20 z-40 bg-white" style={{ borderColor: "#DDDDDD" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-hide">
+            {CATEGORIE.map((cat) => (
               <button
-                key={s}
-                onClick={() => handleSuggerimento(s)}
-                className="px-4 py-1.5 rounded-full text-sm border border-white/25 text-white/65 hover:bg-white/15 hover:text-white transition-colors"
+                key={cat.id}
+                onClick={() => {
+                  setCategoriaAttiva(cat);
+                  if (mostraAI) chiudiAI();
+                }}
+                className={`flex flex-col items-center gap-1 px-4 py-3 text-xs font-medium whitespace-nowrap shrink-0 border-b-2 transition-all ${
+                  categoriaAttiva.id === cat.id && !mostraAI
+                    ? "border-[#222222] text-[#222222]"
+                    : "border-transparent text-[#717171] hover:text-[#222222] hover:border-gray-300"
+                }`}
               >
-                {s}
+                <span className="text-xl">{cat.emoji}</span>
+                <span>{cat.label}</span>
               </button>
             ))}
+
+            {/* Divider */}
+            <div className="self-stretch w-px bg-gray-200 mx-2 shrink-0" />
+
+            {/* Bottone AI search */}
+            <button
+              onClick={() => setMostraAI(!mostraAI)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-all shrink-0 ${
+                mostraAI
+                  ? "border-[#2D6A4F] bg-[#2D6A4F] text-white"
+                  : "border-gray-200 text-[#2D6A4F] hover:bg-gray-50"
+              }`}
+            >
+              <Sparkles size={13} />
+              Cerca con AI
+            </button>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ── RISULTATI RICERCA ────────────────────────────────────── */}
-      {(stato === "completato" || stato === "errore") && (
-        <section className="bg-white border-b border-gray-100 py-8">
+      {/* ── AI SEARCH ESPANSO ─────────────────────────────────── */}
+      {mostraAI && (
+        <div className="border-b bg-[#F7F7F7] py-6" style={{ borderColor: "#DDDDDD" }}>
           <div className="max-w-2xl mx-auto px-4">
-            {stato === "errore" && (
-              <div className="rounded-xl border border-red-100 bg-red-50 px-5 py-4 text-sm text-red-700">
-                {messaggioErrore}
+            <form onSubmit={handleAISubmit} className="flex gap-2">
+              <div className="relative flex-1">
+                <Sparkles
+                  size={16}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D6A4F] shrink-0"
+                />
+                <input
+                  type="text"
+                  value={queryAI}
+                  onChange={(e) => setQueryAI(e.target.value)}
+                  placeholder="es. Agriturismo romantico con piscina in Toscana per 2 persone..."
+                  autoFocus
+                  className="w-full pl-10 pr-4 py-3.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition"
+                  style={{ borderColor: "#DDDDDD" }}
+                />
               </div>
-            )}
-
-            {stato === "completato" && filtri && (
-              <div
-                className="rounded-2xl border bg-white shadow-sm px-6 py-5 flex flex-col gap-4"
-                style={{ borderColor: "#2D6A4F33" }}
+              <button
+                type="submit"
+                disabled={caricandoAI || !queryAI.trim()}
+                className="px-5 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center gap-2 shrink-0"
+                style={{ backgroundColor: "#2D6A4F" }}
               >
-                <p
-                  className="text-xs font-semibold uppercase tracking-widest"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Filtri interpretati dall&apos;AI
-                </p>
-
-                <div className="flex flex-col gap-3">
-                  {(filtri.regione ?? filtri.provincia) && (
-                    <div className="flex items-center gap-3">
-                      <MapPin size={15} className="shrink-0" style={{ color: "#2D6A4F" }} />
-                      <span className="text-sm text-gray-700">
-                        <span className="font-medium">Luogo:</span>{" "}
-                        {[filtri.provincia, filtri.regione].filter(Boolean).join(", ")}
-                      </span>
-                    </div>
-                  )}
-
-                  {filtri.tipo_ospitalita.length > 0 && (
-                    <div className="flex items-start gap-3">
-                      <HomeIcon size={15} className="shrink-0 mt-0.5" style={{ color: "#2D6A4F" }} />
-                      <div className="flex flex-wrap gap-2">
-                        {filtri.tipo_ospitalita.map((tipo) => (
-                          <span
-                            key={tipo}
-                            className="px-3 py-0.5 rounded-full text-xs font-medium border"
-                            style={{ borderColor: "#2D6A4F", color: "#2D6A4F" }}
-                          >
-                            {tipo}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filtri.servizi.length > 0 && (
-                    <div className="flex items-start gap-3">
-                      <Tag size={15} className="shrink-0 mt-0.5" style={{ color: "#2D6A4F" }} />
-                      <div className="flex flex-wrap gap-2">
-                        {filtri.servizi.map((servizio) => (
-                          <span
-                            key={servizio}
-                            className="px-3 py-0.5 rounded-full text-xs font-medium text-white"
-                            style={{ backgroundColor: "#D4A017" }}
-                          >
-                            {servizio}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {filtri.keywords.length > 0 && (
-                    <div className="flex items-start gap-3">
-                      <Star size={15} className="shrink-0 mt-0.5" style={{ color: "#2D6A4F" }} />
-                      <div className="flex flex-wrap gap-2">
-                        {filtri.keywords.map((kw) => (
-                          <span
-                            key={kw}
-                            className="px-3 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
-                          >
-                            {kw}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {!filtri.regione &&
-                    !filtri.provincia &&
-                    filtri.tipo_ospitalita.length === 0 &&
-                    filtri.servizi.length === 0 &&
-                    filtri.keywords.length === 0 && (
-                      <p className="text-sm text-gray-500">
-                        Nessun filtro specifico rilevato. Prova a essere più preciso nella ricerca.
-                      </p>
-                    )}
-                </div>
-              </div>
+                {caricandoAI ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
+                {caricandoAI ? "Analisi..." : "Cerca"}
+              </button>
+              <button
+                type="button"
+                onClick={chiudiAI}
+                className="p-3 rounded-xl border text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <X size={16} />
+              </button>
+            </form>
+            {messaggioErrore && (
+              <p className="mt-2 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">
+                {messaggioErrore}
+              </p>
             )}
+            <p className="mt-2 text-xs text-gray-400 text-center">
+              Descrivi liberamente la tua vacanza ideale — l&apos;AI troverà le strutture più adatte.
+            </p>
           </div>
-        </section>
+        </div>
       )}
 
-      {/* ── COME FUNZIONA ────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20" style={{ backgroundColor: "#FAFAF7" }}>
-        <div className="max-w-5xl mx-auto px-4">
-          <h2
-            className="font-display text-3xl sm:text-4xl font-bold text-center mb-3"
-            style={{ color: "#1B4332" }}
-          >
-            Come funziona
-          </h2>
-          <p className="text-center text-gray-500 mb-12 max-w-md mx-auto">
-            Trovare l&apos;agriturismo ideale non è mai stato così semplice.
-          </p>
-
-          <div className="grid sm:grid-cols-3 gap-8">
-            {COME_FUNZIONA.map((step, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-4">
-                <div
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center text-white shadow-sm"
-                  style={{ backgroundColor: "#2D6A4F" }}
-                >
-                  {step.icona}
-                </div>
-                <div>
-                  <p
-                    className="text-xs font-bold uppercase tracking-widest mb-1"
-                    style={{ color: "#52B788" }}
-                  >
-                    Step {i + 1}
-                  </p>
-                  <h3
-                    className="font-display font-bold text-lg mb-2"
-                    style={{ color: "#1B4332" }}
-                  >
-                    {step.titolo}
-                  </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
-                </div>
-              </div>
-            ))}
+      {/* ── GRIGLIA AGRITURISMI ──────────────────────────────────── */}
+      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
+        {caricandoGrid ? (
+          <div className="flex items-center justify-center py-24">
+            <Loader2 size={28} className="animate-spin text-[#2D6A4F]" />
           </div>
-        </div>
-      </section>
-
-      {/* ── REGIONI ──────────────────────────────────────────────── */}
-      <section className="py-16 sm:py-20 bg-white">
-        <div className="max-w-5xl mx-auto px-4">
-          <h2
-            className="font-display text-3xl sm:text-4xl font-bold text-center mb-3"
-            style={{ color: "#1B4332" }}
-          >
-            Esplora per regione
-          </h2>
-          <p className="text-center text-gray-500 mb-12">
-            Scegli una regione e lascia parlare il territorio.
-          </p>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-            {REGIONI.map((r) => (
-              <button
-                key={r.nome}
-                onClick={() => handleRegione(r.query)}
-                className="group relative flex flex-col items-center justify-center gap-3 rounded-2xl border p-6 text-center transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
-                style={{
-                  backgroundColor: r.sfondo,
-                  borderColor: r.bordo,
-                }}
-              >
-                <span className="text-4xl group-hover:scale-110 transition-transform duration-300">
-                  {r.emoji}
-                </span>
-                <span
-                  className="font-display font-bold text-base"
-                  style={{ color: "#1B4332" }}
-                >
-                  {r.nome}
-                </span>
-              </button>
-            ))}
+        ) : agriturismi.length === 0 ? (
+          <div className="text-center py-24">
+            <p className="text-5xl mb-4">🌿</p>
+            <p className="font-semibold text-gray-700 mb-1">Nessun agriturismo trovato</p>
+            <p className="text-sm text-gray-400">
+              Prova a selezionare una categoria diversa o usa la ricerca AI per una ricerca più specifica.
+            </p>
           </div>
-        </div>
-      </section>
-
-      {/* ── FOOTER ───────────────────────────────────────────────── */}
-      <footer style={{ backgroundColor: "#1B4332" }}>
-        <div className="max-w-5xl mx-auto px-6 py-12">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
-            {/* Logo + tagline */}
-            <div>
-              <p
-                className="font-display text-xl font-bold text-white mb-1"
-              >
-                agriturismi.app
-              </p>
-              <p className="text-white/50 text-sm">
-                Il motore di ricerca AI per gli agriturismi italiani.
-              </p>
-            </div>
-
-            {/* Link */}
-            <nav className="flex flex-wrap gap-x-6 gap-y-2">
-              {[
-                { href: "/", label: "Esplora" },
-                { href: "/blog", label: "Blog" },
-                { href: "/login", label: "Accedi" },
-              ].map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="text-sm text-white/60 hover:text-white transition-colors"
-                >
-                  {label}
-                </Link>
+        ) : (
+          <>
+            <p className="text-sm text-gray-500 mb-6">
+              {agriturismi.length} struttur{agriturismi.length === 1 ? "a" : "e"}
+              {categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {agriturismi.map((a) => (
+                <AgriCard key={a.id} agriturismo={a} />
               ))}
-            </nav>
-          </div>
+            </div>
+          </>
+        )}
+      </main>
 
-          <div
-            className="mt-10 pt-6 border-t text-xs text-white/35 flex flex-col sm:flex-row justify-between gap-2"
-            style={{ borderColor: "rgba(255,255,255,0.1)" }}
-          >
-            <span>© 2026 agriturismi.app — Tutti i diritti riservati</span>
-            <span>Made in Italy 🇮🇹</span>
-          </div>
-        </div>
-      </footer>
     </div>
+  );
+}
+
+// ── Wrapper con Suspense per useSearchParams ───────────────────
+export default function HomePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center flex-1 py-24">
+          <Loader2 size={28} className="animate-spin text-[#2D6A4F]" />
+        </div>
+      }
+    >
+      <HomeInterna />
+    </Suspense>
   );
 }

@@ -1,13 +1,29 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { MapPin, Phone, Mail, Globe, ExternalLink } from "lucide-react";
+import {
+  MapPin, Phone, Mail, Globe, ExternalLink,
+  Waves, UtensilsCrossed, Wifi, Car, PawPrint,
+  Baby, Wine, Mountain, Wind, Sparkles, Tag,
+} from "lucide-react";
 import { creaClientServer } from "@/lib/supabase-server";
 import ShareButtons from "@/components/ShareButtons";
 import MappaWrapper from "@/components/MappaWrapper";
 import type { Agriturismo } from "@/types";
 
-// Cache della query nell'ambito di un singolo render (evita doppia chiamata tra generateMetadata e Page)
+const SERVIZI_ICONE: Record<string, React.ReactNode> = {
+  piscina:              <Waves size={18} />,
+  ristorante:           <UtensilsCrossed size={18} />,
+  "Wi-Fi":              <Wifi size={18} />,
+  parcheggio:           <Car size={18} />,
+  "animali ammessi":    <PawPrint size={18} />,
+  "area giochi bambini":<Baby size={18} />,
+  "degustazione vini":  <Wine size={18} />,
+  trekking:             <Mountain size={18} />,
+  maneggio:             <Wind size={18} />,
+  spa:                  <Sparkles size={18} />,
+};
+
 const getAgriturismo = cache(async (slug: string): Promise<Agriturismo | null> => {
   const supabase = await creaClientServer();
   const { data } = await supabase
@@ -23,48 +39,27 @@ type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const agriturismo = await getAgriturismo(slug);
-
-  if (!agriturismo) {
-    return { title: "Agriturismo non trovato — agriturismi.app" };
-  }
+  const a = await getAgriturismo(slug);
+  if (!a) return { title: "Agriturismo non trovato — agriturismi.app" };
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agriturismi.app";
   const url = `${appUrl}/agriturismo/${slug}`;
-  const descrizione =
-    agriturismo.descrizione?.slice(0, 160) ??
-    `Scopri ${agriturismo.nome}, agriturismo in ${agriturismo.regione ?? "Italia"}.`;
+  const desc =
+    a.descrizione?.slice(0, 160) ??
+    `Scopri ${a.nome}, agriturismo in ${a.regione ?? "Italia"}.`;
 
   return {
-    title: `${agriturismo.nome} — agriturismi.app`,
-    description: descrizione,
+    title: `${a.nome} — agriturismi.app`,
+    description: desc,
     openGraph: {
-      title: agriturismo.nome,
-      description: descrizione,
-      url,
+      title: a.nome, description: desc, url,
       siteName: "agriturismi.app",
-      ...(agriturismo.foto_principale
-        ? {
-            images: [
-              {
-                url: agriturismo.foto_principale,
-                width: 1200,
-                height: 630,
-                alt: agriturismo.nome,
-              },
-            ],
-          }
-        : {}),
-      locale: "it_IT",
-      type: "website",
+      ...(a.foto_principale ? { images: [{ url: a.foto_principale, width: 1200, height: 630, alt: a.nome }] } : {}),
+      locale: "it_IT", type: "website",
     },
     twitter: {
-      card: "summary_large_image",
-      title: agriturismo.nome,
-      description: descrizione,
-      ...(agriturismo.foto_principale
-        ? { images: [agriturismo.foto_principale] }
-        : {}),
+      card: "summary_large_image", title: a.nome, description: desc,
+      ...(a.foto_principale ? { images: [a.foto_principale] } : {}),
     },
     alternates: { canonical: url },
   };
@@ -72,266 +67,294 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function SchedaAgriturismo({ params }: Params) {
   const { slug } = await params;
-  const agriturismo = await getAgriturismo(slug);
-
-  if (!agriturismo) notFound();
+  const a = await getAgriturismo(slug);
+  if (!a) notFound();
 
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agriturismi.app";
   const url = `${appUrl}/agriturismo/${slug}`;
+  const luogo = [a.comune, a.provincia, a.regione].filter(Boolean).join(" · ");
 
-  const luogo = [agriturismo.comune, agriturismo.provincia, agriturismo.regione]
-    .filter(Boolean)
-    .join(", ");
+  // Gallery: fino a 5 foto (principale + 4 dalla gallery)
+  const fotoGallery = [
+    ...(a.foto_principale ? [a.foto_principale] : []),
+    ...(a.gallery ?? []),
+  ].slice(0, 5);
+  const hasFoto = fotoGallery.length > 0;
 
   return (
-    <div>
-      {/* ── HERO ──────────────────────────────────────────────────── */}
-      <div className="relative w-full h-72 sm:h-96 overflow-hidden">
-        {agriturismo.foto_principale ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={agriturismo.foto_principale}
-            alt={agriturismo.nome}
-            className="absolute inset-0 w-full h-full object-cover"
-          />
+    <div className="bg-white">
+
+      {/* ── GALLERY ──────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
+        {/* Titolo sopra gallery (mobile) */}
+        <h1 className="sm:hidden text-2xl font-bold text-[#222222] mb-4">{a.nome}</h1>
+
+        {hasFoto ? (
+          <div className="grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden h-64 sm:h-[420px]">
+            {/* Foto principale grande */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fotoGallery[0]}
+              alt={a.nome}
+              className="col-span-2 row-span-2 w-full h-full object-cover"
+            />
+            {/* 4 foto piccole (o placeholder) */}
+            {[1, 2, 3, 4].map((i) =>
+              fotoGallery[i] ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={i}
+                  src={fotoGallery[i]}
+                  alt={`${a.nome} ${i + 1}`}
+                  className="col-span-1 row-span-1 w-full h-full object-cover"
+                />
+              ) : (
+                <div
+                  key={i}
+                  className="col-span-1 row-span-1 w-full h-full flex items-center justify-center"
+                  style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)" }}
+                >
+                  <span className="text-2xl opacity-20">🌿</span>
+                </div>
+              )
+            )}
+          </div>
         ) : (
           <div
-            className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-            style={{
-              background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #52B788 100%)",
-            }}
+            className="rounded-2xl h-64 sm:h-[420px] flex flex-col items-center justify-center gap-3"
+            style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #52B788 100%)" }}
           >
-            <span className="text-7xl opacity-20 select-none">🌿</span>
-            <span className="text-white/40 text-sm font-medium select-none">
+            <span className="text-8xl opacity-20 select-none">🌿</span>
+            <span className="text-white/40 text-sm select-none">
               Foto non ancora disponibile
             </span>
           </div>
         )}
-        {/* Overlay gradiente */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-        {/* Nome agriturismo */}
-        <div className="absolute bottom-0 left-0 right-0 px-4 sm:px-8 pb-6">
-          <div className="max-w-5xl mx-auto">
-            {agriturismo.verificato && (
-              <span
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white mb-2"
-                style={{ backgroundColor: "#D4A017" }}
-              >
-                ✓ Verificato
-              </span>
-            )}
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-white leading-tight drop-shadow">
-              {agriturismo.nome}
-            </h1>
-            {luogo && (
-              <p className="mt-1 text-white/80 text-sm flex items-center gap-1">
-                <MapPin size={13} />
-                {luogo}
-              </p>
-            )}
-          </div>
-        </div>
       </div>
 
-      {/* ── BANNER SCHEDA NON RIVENDICATA ─────────────────────────── */}
-      {!agriturismo.verificato && (
-        <div className="bg-gray-50 border-b border-gray-100 py-2.5 px-4">
-          <div className="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs text-gray-400">
-              ⚑ Scheda informativa non rivendicata — i dati provengono da fonti pubbliche e potrebbero non essere aggiornati.
-            </p>
-            <a
-              href={`/rivendica-scheda?slug=${agriturismo.slug}`}
-              className="text-xs font-semibold underline underline-offset-2 shrink-0 transition-colors"
-              style={{ color: "#2D6A4F" }}
-            >
-              Sei il titolare? Rivendica gratuitamente la scheda →
-            </a>
-          </div>
-        </div>
-      )}
+      {/* ── CONTENUTO ────────────────────────────────────────────── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
 
-      {/* ── CONTENUTO ─────────────────────────────────────────────── */}
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          {/* ── COLONNA SINISTRA ── */}
-          <div className="lg:col-span-2 flex flex-col gap-10">
+          {/* ── COLONNA SINISTRA ─────────────────────────────────── */}
+          <div className="lg:col-span-2 flex flex-col gap-8">
 
-            {/* Sezione luogo */}
-            {(agriturismo.regione || agriturismo.indirizzo) && (
-              <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
+            {/* Titolo (desktop) */}
+            <div>
+              <h1 className="hidden sm:block text-3xl font-bold text-[#222222] mb-2">
+                {a.nome}
+              </h1>
+              <p className="flex flex-wrap items-center gap-2 text-sm text-[#717171]">
+                {a.regione && <span>{a.regione}</span>}
+                {a.comune && <><span>·</span><span>{a.comune}</span></>}
+                {a.tipo_ospitalita.length > 0 && (
+                  <><span>·</span><span>{a.tipo_ospitalita.join(", ")}</span></>
+                )}
+                {a.verificato && (
+                  <span
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium text-white"
+                    style={{ backgroundColor: "#2D6A4F" }}
+                  >
+                    ✓ Verificato
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Banner non rivendicata */}
+            {!a.verificato && (
+              <div
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3"
+                style={{ borderColor: "#DDDDDD", backgroundColor: "#F7F7F7" }}
+              >
+                <p className="text-xs text-[#717171]">
+                  ⚑ Scheda informativa non rivendicata — i dati provengono da fonti pubbliche.
+                </p>
+                <a
+                  href={`/rivendica-scheda?slug=${a.slug}`}
+                  className="text-xs font-semibold underline underline-offset-2 shrink-0"
                   style={{ color: "#2D6A4F" }}
                 >
+                  Sei il titolare? Rivendica gratuitamente →
+                </a>
+              </div>
+            )}
+
+            <hr style={{ borderColor: "#DDDDDD" }} />
+
+            {/* Dove si trova */}
+            {luogo && (
+              <section>
+                <h2 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#717171" }}>
                   Dove si trova
                 </h2>
-                <div className="flex flex-col gap-2">
-                  {agriturismo.indirizzo && (
-                    <div className="flex items-start gap-2 text-sm text-gray-700">
-                      <MapPin size={15} className="mt-0.5 shrink-0" style={{ color: "#2D6A4F" }} />
-                      <span>{agriturismo.indirizzo}</span>
-                    </div>
-                  )}
-                  {agriturismo.comune && (
-                    <div className="flex items-start gap-2 text-sm text-gray-700">
-                      <MapPin size={15} className="mt-0.5 shrink-0 opacity-0" />
-                      <span>
-                        {[agriturismo.comune, agriturismo.provincia, agriturismo.regione]
-                          .filter(Boolean)
-                          .join(" · ")}
+                <div className="flex items-start gap-2 text-sm text-[#222222]">
+                  <MapPin size={16} className="mt-0.5 shrink-0" style={{ color: "#2D6A4F" }} />
+                  <span>
+                    {[a.indirizzo, a.comune, a.provincia, a.regione]
+                      .filter(Boolean)
+                      .join(", ")}
+                  </span>
+                </div>
+              </section>
+            )}
+
+            {/* Descrizione */}
+            {a.descrizione && (
+              <section>
+                <h2 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#717171" }}>
+                  La struttura
+                </h2>
+                <p className="text-sm text-[#222222] leading-relaxed whitespace-pre-line">
+                  {a.descrizione}
+                </p>
+              </section>
+            )}
+
+            {a.descrizione_ai && (
+              <div
+                className="text-xs text-[#717171] bg-[#F7F7F7] rounded-xl px-4 py-3 border"
+                style={{ borderColor: "#DDDDDD" }}
+              >
+                <Tag size={11} className="inline mr-1.5 opacity-60" />
+                {a.descrizione_ai}
+              </div>
+            )}
+
+            <hr style={{ borderColor: "#DDDDDD" }} />
+
+            {/* Cosa offre */}
+            {a.servizi.length > 0 && (
+              <section>
+                <h2 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "#717171" }}>
+                  Cosa offre
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {a.servizi.map((s) => (
+                    <div key={s} className="flex items-center gap-3 text-sm text-[#222222]">
+                      <span className="text-[#2D6A4F] shrink-0">
+                        {SERVIZI_ICONE[s] ?? <Tag size={18} />}
                       </span>
+                      <span>{s}</span>
                     </div>
-                  )}
+                  ))}
                 </div>
               </section>
             )}
 
             {/* Mappa */}
-            {agriturismo.lat !== null && agriturismo.lng !== null && (
+            {a.lat !== null && a.lng !== null && (
               <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Mappa
+                <h2 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: "#717171" }}>
+                  Posizione
                 </h2>
-                <MappaWrapper
-                  lat={agriturismo.lat}
-                  lng={agriturismo.lng}
-                  nome={agriturismo.nome}
-                />
-              </section>
-            )}
-
-            {/* Descrizione */}
-            {agriturismo.descrizione && (
-              <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Descrizione
-                </h2>
-                <p className="text-gray-700 leading-relaxed whitespace-pre-line text-sm sm:text-base">
-                  {agriturismo.descrizione}
-                </p>
-              </section>
-            )}
-          </div>
-
-          {/* ── COLONNA DESTRA ── */}
-          <div className="flex flex-col gap-8">
-
-            {/* Servizi */}
-            {agriturismo.servizi.length > 0 && (
-              <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Servizi
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {agriturismo.servizi.map((s) => (
-                    <span
-                      key={s}
-                      className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                      style={{ backgroundColor: "#2D6A4F" }}
-                    >
-                      {s}
-                    </span>
-                  ))}
+                <div className="rounded-2xl overflow-hidden">
+                  <MappaWrapper lat={a.lat} lng={a.lng} nome={a.nome} />
                 </div>
               </section>
             )}
 
-            {/* Tipo ospitalità */}
-            {agriturismo.tipo_ospitalita.length > 0 && (
-              <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Ospitalità
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {agriturismo.tipo_ospitalita.map((t) => (
-                    <span
-                      key={t}
-                      className="px-3 py-1 rounded-full text-xs font-medium border"
-                      style={{ borderColor: "#2D6A4F", color: "#2D6A4F" }}
-                    >
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {/* Contatti */}
-            {(agriturismo.telefono || agriturismo.email || agriturismo.sito_web) && (
-              <section>
-                <h2
-                  className="text-xs font-semibold uppercase tracking-widest mb-3"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Contatti
-                </h2>
-                <div className="flex flex-col gap-3">
-                  {agriturismo.telefono && (
-                    <a
-                      href={`tel:${agriturismo.telefono}`}
-                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-[#2D6A4F] transition-colors"
-                    >
-                      <Phone size={15} style={{ color: "#2D6A4F" }} />
-                      {agriturismo.telefono}
-                    </a>
-                  )}
-                  {agriturismo.email && (
-                    <a
-                      href={`mailto:${agriturismo.email}`}
-                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-[#2D6A4F] transition-colors"
-                    >
-                      <Mail size={15} style={{ color: "#2D6A4F" }} />
-                      {agriturismo.email}
-                    </a>
-                  )}
-                  {agriturismo.sito_web && (
-                    <a
-                      href={agriturismo.sito_web}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2 text-sm text-gray-700 hover:text-[#2D6A4F] transition-colors"
-                    >
-                      <Globe size={15} style={{ color: "#2D6A4F" }} />
-                      <span className="truncate">{agriturismo.sito_web.replace(/^https?:\/\//, "")}</span>
-                      <ExternalLink size={12} className="shrink-0 opacity-50" />
-                    </a>
-                  )}
-                </div>
-              </section>
-            )}
-
-            {/* Condivisione social */}
+            {/* Condividi */}
             <section>
-              <h2
-                className="text-xs font-semibold uppercase tracking-widest mb-3"
-                style={{ color: "#2D6A4F" }}
-              >
+              <h2 className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: "#717171" }}>
                 Condividi
               </h2>
-              <ShareButtons url={url} titolo={agriturismo.nome} />
+              <ShareButtons url={url} titolo={a.nome} />
             </section>
           </div>
+
+          {/* ── SIDEBAR DESTRA (sticky) ──────────────────────────── */}
+          <aside className="lg:col-span-1">
+            <div className="sticky top-28 flex flex-col gap-4">
+
+              {/* Card contatti */}
+              {(a.telefono || a.email || a.sito_web) && (
+                <div
+                  className="rounded-2xl border p-6 shadow-sm"
+                  style={{ borderColor: "#DDDDDD" }}
+                >
+                  <h2 className="font-semibold text-[#222222] mb-4">
+                    Contatta la struttura
+                  </h2>
+                  <div className="flex flex-col gap-3">
+                    {a.telefono && (
+                      <a
+                        href={`tel:${a.telefono}`}
+                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                      >
+                        <span
+                          className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
+                          style={{ borderColor: "#DDDDDD" }}
+                        >
+                          <Phone size={15} />
+                        </span>
+                        {a.telefono}
+                      </a>
+                    )}
+                    {a.email && (
+                      <a
+                        href={`mailto:${a.email}`}
+                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                      >
+                        <span
+                          className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
+                          style={{ borderColor: "#DDDDDD" }}
+                        >
+                          <Mail size={15} />
+                        </span>
+                        <span className="truncate">{a.email}</span>
+                      </a>
+                    )}
+                    {a.sito_web && (
+                      <a
+                        href={a.sito_web}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                      >
+                        <span
+                          className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
+                          style={{ borderColor: "#DDDDDD" }}
+                        >
+                          <Globe size={15} />
+                        </span>
+                        <span className="truncate flex-1">
+                          {a.sito_web.replace(/^https?:\/\//, "")}
+                        </span>
+                        <ExternalLink size={12} className="shrink-0 opacity-50" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Card rivendica scheda */}
+              {!a.verificato && (
+                <div
+                  className="rounded-2xl border p-5"
+                  style={{ borderColor: "#DDDDDD", backgroundColor: "#F7F7F7" }}
+                >
+                  <p className="text-sm font-semibold text-[#222222] mb-1">
+                    Sei il titolare?
+                  </p>
+                  <p className="text-xs text-[#717171] mb-3 leading-relaxed">
+                    Rivendica questa scheda gratuitamente per aggiornare i dati,
+                    aggiungere foto e ricevere contatti dai visitatori.
+                  </p>
+                  <a
+                    href={`/rivendica-scheda?slug=${a.slug}`}
+                    className="block w-full text-center py-2.5 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: "#2D6A4F" }}
+                  >
+                    Rivendica gratuitamente
+                  </a>
+                </div>
+              )}
+            </div>
+          </aside>
         </div>
       </div>
 
-      {/* ── FOOTER PAGINA ─────────────────────────────────────────── */}
-      <footer className="py-6 text-center text-sm text-gray-400 border-t border-gray-100">
-        © 2026 agriturismi.app — Tutti i diritti riservati
-      </footer>
     </div>
   );
 }
