@@ -9,7 +9,9 @@ export async function registrati(
   nome: string,
   cognome: string,
   email: string,
-  password: string
+  password: string,
+  ruolo: "visitatore" | "proprietario" = "visitatore",
+  extra?: { telefono?: string; nome_struttura?: string; comune_struttura?: string }
 ) {
   const supabase = creaClientBrowser();
   const { data, error } = await supabase.auth.signUp({
@@ -26,7 +28,7 @@ export async function registrati(
   if (data.session && data.user) {
     await supabase
       .from("profiles")
-      .upsert({ id: data.user.id, nome, cognome });
+      .upsert({ id: data.user.id, nome, cognome, ruolo, ...(extra ?? {}) });
   }
 
   return { data, error: null };

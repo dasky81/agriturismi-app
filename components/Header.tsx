@@ -10,13 +10,16 @@ export default async function Header() {
   } = await supabase.auth.getUser();
 
   let nome: string | null = null;
+  let ruolo: string | null = null;
+
   if (user) {
     const { data: profilo } = await supabase
       .from("profiles")
-      .select("nome")
+      .select("nome, ruolo")
       .eq("id", user.id)
       .single();
     nome = profilo?.nome ?? (user.user_metadata?.nome as string | undefined) ?? null;
+    ruolo = profilo?.ruolo ?? null;
   }
 
   return (
@@ -54,7 +57,7 @@ export default async function Header() {
         </div>
 
         {/* ── AUTH DESTRA ──────────────────────────────────── */}
-        <HeaderAuth utente={user ? { nome } : null} />
+        <HeaderAuth utente={user ? { nome, ruolo } : null} />
       </div>
     </header>
   );

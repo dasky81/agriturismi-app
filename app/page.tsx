@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { Search, Loader2, Sparkles, X } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Search, Loader2, Sparkles, X, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import { creaClientBrowser } from "@/lib/supabase";
 import type { FiltriRicerca } from "@/lib/claude";
@@ -19,6 +19,8 @@ interface Categoria {
   valore?: string;
   valori?: string[];
 }
+
+type AgriturismoCon = Agriturismo & { distanza_km?: number };
 
 const CATEGORIE: Categoria[] = [
   { id: "all",      label: "Tutti",    emoji: "🌿", tipo: "all" },
@@ -37,15 +39,18 @@ const CATEGORIE: Categoria[] = [
 // ── Homepage interna (legge searchParams) ──────────────────────
 function HomeInterna() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const queryIniziale = searchParams.get("q") ?? "";
+  const vicinoPar = searchParams.get("vicino") ?? "";
 
   const [categoriaAttiva, setCategoriaAttiva] = useState<Categoria>(CATEGORIE[0]);
-  const [agriturismi, setAgriturismi] = useState<Agriturismo[]>([]);
+  const [agriturismi, setAgriturismi] = useState<AgriturismoCon[]>([]);
   const [caricandoGrid, setCaricandoGrid] = useState(true);
   const [mostraAI, setMostraAI] = useState(!!queryIniziale);
   const [queryAI, setQueryAI] = useState(queryIniziale);
   const [caricandoAI, setCaricandoAI] = useState(false);
   const [messaggioErrore, setMessaggioErrore] = useState("");
+  const [geoLoading, setGeoLoading] = useState(false);
 
   const supabase = creaClientBrowser();
 
@@ -63,16 +68,66 @@ function HomeInterna() {
       }
 
       const { data } = await query.limit(24);
-      setAgriturismi((data ?? []) as Agriturismo[]);
+      setAgriturismi((data ?? []) as AgriturismoCon[]);
       setCaricandoGrid(false);
     },
     [supabase]
   );
 
-  // Carica grid al cambio categoria
+  async function cercaVicinoAMe(lat: number, lng: number) {
+    setCaricandoGrid(true);
+    setMessaggioErrore("");
+    try {
+      const risposta = await fetch("/api/vicino-a-me", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lat, lng }),
+      });
+      if (!risposta.ok) throw new Error();
+      const dati = (await risposta.json()) as { agriturismi: AgriturismoCon[] };
+      setAgriturismi(dati.agriturismi);
+    } catch {
+      setMessaggioErrore("Impossibile caricare strutture vicino a te. Riprova.");
+    } finally {
+      setCaricandoGrid(false);
+    }
+  }
+
+  function handleGeoButton() {
+    if (!("geolocation" in navigator)) {
+      setMessaggioErrore("Il browser non supporta la geolocalizzazione.");
+      return;
+    }
+    setMessaggioErrore("");
+    setGeoLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoLoading(false);
+        const { latitude: lat, longitude: lng } = pos.coords;
+        router.replace(`/?vicino=${lat},${lng}`);
+      },
+      () => {
+        setGeoLoading(false);
+        setMessaggioErrore("Attiva la posizione nel browser per usare questa funzione.");
+      },
+      { timeout: 10000 }
+    );
+  }
+
+  // Carica grid al cambio categoria (skip se vicino o AI attivi)
   useEffect(() => {
+    if (vicinoPar || mostraAI) return;
     void caricaPerCategoria(categoriaAttiva);
-  }, [categoriaAttiva, caricaPerCategoria]);
+  }, [categoriaAttiva, caricaPerCategoria, vicinoPar, mostraAI]);
+
+  // Gestisci param "vicino" da URL
+  useEffect(() => {
+    if (!vicinoPar) return;
+    const parts = vicinoPar.split(",").map(Number);
+    if (parts.length !== 2 || isNaN(parts[0]) || isNaN(parts[1])) return;
+    void cercaVicinoAMe(parts[0], parts[1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [vicinoPar]);
 
   // Se c'è query iniziale dall'header, avvia ricerca AI
   useEffect(() => {
@@ -96,7 +151,6 @@ function HomeInterna() {
       const dati = (await risposta.json()) as { filtri: FiltriRicerca };
       const filtri = dati.filtri;
 
-      // Costruisci query Supabase dai filtri AI
       setCaricandoGrid(true);
       let query = supabase.from("agriturismi").select("*").eq("attivo", true);
       if (filtri.regione) query = query.ilike("regione", filtri.regione);
@@ -104,7 +158,7 @@ function HomeInterna() {
       if (filtri.servizi.length > 0) query = query.overlaps("servizi", filtri.servizi);
       if (filtri.tipo_ospitalita.length > 0) query = query.overlaps("tipo_ospitalita", filtri.tipo_ospitalita);
       const { data } = await query.limit(24);
-      setAgriturismi((data ?? []) as Agriturismo[]);
+      setAgriturismi((data ?? []) as AgriturismoCon[]);
       setCaricandoGrid(false);
     } catch {
       setMessaggioErrore("Si è verificato un errore. Riprova.");
@@ -125,6 +179,20 @@ function HomeInterna() {
     void caricaPerCategoria(categoriaAttiva);
   }
 
+  function handleTabClick(cat: Categoria) {
+    setCategoriaAttiva(cat);
+    if (mostraAI) {
+      setMostraAI(false);
+      setQueryAI("");
+    }
+    if (vicinoPar) {
+      router.replace("/");
+    }
+    setMessaggioErrore("");
+  }
+
+  const mostraVicino = vicinoPar.length > 0;
+
   return (
     <div className="flex flex-col flex-1 bg-white">
 
@@ -135,12 +203,9 @@ function HomeInterna() {
             {CATEGORIE.map((cat) => (
               <button
                 key={cat.id}
-                onClick={() => {
-                  setCategoriaAttiva(cat);
-                  if (mostraAI) chiudiAI();
-                }}
+                onClick={() => handleTabClick(cat)}
                 className={`flex flex-col items-center gap-1 px-4 py-3 text-xs font-medium whitespace-nowrap shrink-0 border-b-2 transition-all ${
-                  categoriaAttiva.id === cat.id && !mostraAI
+                  categoriaAttiva.id === cat.id && !mostraAI && !mostraVicino
                     ? "border-[#222222] text-[#222222]"
                     : "border-transparent text-[#717171] hover:text-[#222222] hover:border-gray-300"
                 }`}
@@ -149,6 +214,23 @@ function HomeInterna() {
                 <span>{cat.label}</span>
               </button>
             ))}
+
+            {/* Divider */}
+            <div className="self-stretch w-px bg-gray-200 mx-2 shrink-0" />
+
+            {/* Bottone Vicino a me */}
+            <button
+              onClick={handleGeoButton}
+              disabled={geoLoading}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-all shrink-0 disabled:opacity-60 ${
+                mostraVicino
+                  ? "border-[#2D6A4F] bg-[#2D6A4F] text-white"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {geoLoading ? <Loader2 size={13} className="animate-spin" /> : <MapPin size={13} />}
+              Vicino a me
+            </button>
 
             {/* Divider */}
             <div className="self-stretch w-px bg-gray-200 mx-2 shrink-0" />
@@ -207,11 +289,6 @@ function HomeInterna() {
                 <X size={16} />
               </button>
             </form>
-            {messaggioErrore && (
-              <p className="mt-2 text-sm text-red-600 bg-red-50 px-4 py-2 rounded-lg">
-                {messaggioErrore}
-              </p>
-            )}
             <p className="mt-2 text-xs text-gray-400 text-center">
               Descrivi liberamente la tua vacanza ideale — l&apos;AI troverà le strutture più adatte.
             </p>
@@ -221,27 +298,42 @@ function HomeInterna() {
 
       {/* ── GRIGLIA AGRITURISMI ──────────────────────────────────── */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
+        {messaggioErrore && (
+          <p className="mb-4 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
+            {messaggioErrore}
+          </p>
+        )}
+
         {caricandoGrid ? (
           <div className="flex items-center justify-center py-24">
             <Loader2 size={28} className="animate-spin text-[#2D6A4F]" />
           </div>
         ) : agriturismi.length === 0 ? (
           <div className="text-center py-24">
-            <p className="text-5xl mb-4">🌿</p>
-            <p className="font-semibold text-gray-700 mb-1">Nessun agriturismo trovato</p>
+            <p className="text-5xl mb-4">
+              {mostraVicino ? "📍" : "🌿"}
+            </p>
+            <p className="font-semibold text-gray-700 mb-1">
+              {mostraVicino
+                ? "Nessun agriturismo entro 15 km da te"
+                : "Nessun agriturismo trovato"}
+            </p>
             <p className="text-sm text-gray-400">
-              Prova a selezionare una categoria diversa o usa la ricerca AI per una ricerca più specifica.
+              {mostraVicino
+                ? "Prova ad allargare la ricerca o usa i filtri per categoria."
+                : "Prova a selezionare una categoria diversa o usa la ricerca AI."}
             </p>
           </div>
         ) : (
           <>
             <p className="text-sm text-gray-500 mb-6">
-              {agriturismi.length} struttur{agriturismi.length === 1 ? "a" : "e"}
-              {categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}
+              {mostraVicino
+                ? `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"} vicino a te`
+                : `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"}${categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {agriturismi.map((a) => (
-                <AgriCard key={a.id} agriturismo={a} />
+                <AgriCard key={a.id} agriturismo={a} distanza_km={a.distanza_km} />
               ))}
             </div>
           </>
