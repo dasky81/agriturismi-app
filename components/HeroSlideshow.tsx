@@ -5,24 +5,24 @@ import Image from "next/image";
 
 const slides = [
   {
-    url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80",
-    alt: "Colline toscane al tramonto",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1600&q=80",
-    alt: "Panorama campagna italiana",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1600&q=80",
-    alt: "Tavola con prodotti tipici italiani",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1542282088-fe8426682b8f?w=1600&q=80",
-    alt: "Famiglia felice in vacanza natura",
-  },
-  {
-    url: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=1600&q=80",
+    url: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1600&q=80",
     alt: "Vigneto italiano al tramonto",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1600&q=80",
+    alt: "Colline toscane dorate",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1504279577054-acfeccf8fc52?w=1600&q=80",
+    alt: "Frutteto in fiore campagna",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1471086569966-db3eebc25a59?w=1600&q=80",
+    alt: "Lavanda in Provenza colline",
+  },
+  {
+    url: "https://images.unsplash.com/photo-1543362906-acfc16c67564?w=1600&q=80",
+    alt: "Uliveto mediterraneo tramonto",
   },
 ];
 
