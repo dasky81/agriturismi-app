@@ -182,21 +182,25 @@ function HomeInterna() {
       {/* ── CATEGORIA TABS ──────────────────────────────────────── */}
       <div className="border-b sticky top-20 z-40 bg-white" style={{ borderColor: "#DDDDDD" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center gap-1 overflow-x-auto py-1 scrollbar-hide">
-            {CATEGORIE.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => handleTabClick(cat)}
-                className={`flex flex-col items-center gap-1 px-4 py-3 text-xs font-medium whitespace-nowrap shrink-0 border-b-2 transition-all ${
-                  categoriaAttiva.id === cat.id && !mostraAI && !mostraVicino
-                    ? "border-[#222222] text-[#222222]"
-                    : "border-transparent text-[#717171] hover:text-[#222222] hover:border-gray-300"
-                }`}
-              >
-                <span className="text-xl">{cat.emoji}</span>
-                <span>{cat.label}</span>
-              </button>
-            ))}
+          <div className="flex items-center gap-1 overflow-x-auto py-2 snap-x snap-mandatory scrollbar-hide">
+            {CATEGORIE.map((cat, i) => {
+              const attivo = categoriaAttiva.id === cat.id && !mostraAI && !mostraVicino;
+              return (
+                <button
+                  key={cat.id}
+                  onClick={() => handleTabClick(cat)}
+                  className={`tab-fade-in flex flex-col items-center gap-1 px-5 py-3 text-sm font-medium whitespace-nowrap shrink-0 snap-center rounded-xl border transition-all duration-200 hover:scale-[1.02] ${
+                    attivo
+                      ? "border-[#2D6A4F] text-[#2D6A4F] scale-105 shadow-md bg-white"
+                      : "border-transparent text-[#717171] hover:text-[#222222] hover:border-gray-200"
+                  }`}
+                  style={{ animationDelay: `${i * 40}ms` }}
+                >
+                  <span className="text-2xl">{cat.emoji}</span>
+                  <span>{cat.label}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
       </div>

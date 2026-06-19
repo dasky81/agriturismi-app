@@ -65,3 +65,12 @@ body {
 /* Stili toolbar editor Tiptap */
 .tiptap-toolbar button { transition: background-color 0.15s; }
 .tiptap-toolbar button.is-active { background-color: #2D6A4F; color: white; }
+
+/* Animazione fade-in slide-up per i tab categorie */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.tab-fade-in {
+  animation: fadeInUp 0.35s ease both;
+}
