@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Sparkles, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
+import HeroSlideshow from "@/components/HeroSlideshow";
 import { creaClientBrowser } from "@/lib/supabase";
 import type { Agriturismo } from "@/types";
 
@@ -174,6 +175,9 @@ function HomeInterna() {
 
   return (
     <div className="flex flex-col flex-1 bg-white">
+
+      {/* ── HERO SLIDESHOW ──────────────────────────────────────── */}
+      <HeroSlideshow />
 
       {/* ── CATEGORIA TABS ──────────────────────────────────────── */}
       <div className="border-b sticky top-20 z-40 bg-white" style={{ borderColor: "#DDDDDD" }}>
