@@ -35,59 +35,93 @@ interface ArticoloGenerato {
   tags: string[];
 }
 
+const TOOL_SALVA: Anthropic.Tool = {
+  name: "salva_articolo",
+  description: "Salva l'articolo blog generato con tutti i metadati SEO",
+  input_schema: {
+    type: "object" as const,
+    properties: {
+      html: {
+        type: "string",
+        description:
+          "Contenuto HTML dell'articolo (600-800 parole). Usa solo tag h2, p, ul, li, strong.",
+      },
+      excerpt: {
+        type: "string",
+        description: "Breve riassunto dell'articolo, max 160 caratteri.",
+      },
+      og_title: {
+        type: "string",
+        description: "Titolo SEO ottimizzato, max 60 caratteri.",
+      },
+      og_description: {
+        type: "string",
+        description: "Descrizione SEO, max 155 caratteri.",
+      },
+      tags: {
+        type: "array",
+        items: { type: "string" },
+        description: "Array di 3-5 tag tematici.",
+      },
+    },
+    required: ["html", "excerpt", "og_title", "og_description", "tags"],
+  },
+};
+
 async function generaArticolo(client: Anthropic, titolo: string): Promise<ArticoloGenerato> {
   const risposta = await client.messages.create({
     model: "claude-opus-4-8",
-    max_tokens: 2048,
-    system: `Sei un esperto di turismo rurale italiano. Scrivi un articolo blog ottimizzato SEO in italiano per il sito agriturismi.app. Tono: caldo, autentico, esperto. Struttura: intro coinvolgente, 3-4 sezioni con H2, conclusione con CTA.
-
-Restituisci ESCLUSIVAMENTE un oggetto JSON valido (senza backtick né markdown) con questi campi:
-{
-  "html": "contenuto HTML dell'articolo 600-800 parole, usa solo h2, p, ul, li, strong",
-  "excerpt": "stringa di max 160 caratteri che riassume l'articolo",
-  "og_title": "titolo SEO ottimizzato max 60 caratteri",
-  "og_description": "descrizione SEO max 155 caratteri",
-  "tags": ["tag1", "tag2", "tag3"]
-}`,
+    max_tokens: 4096,
+    tools: [TOOL_SALVA],
+    tool_choice: { type: "tool", name: "salva_articolo" },
+    system:
+      "Sei un esperto di turismo rurale italiano. Scrivi articoli blog ottimizzati SEO per il sito agriturismi.app. " +
+      "Tono: caldo, autentico, esperto. Struttura: intro coinvolgente, 3-4 sezioni con H2, conclusione con CTA. " +
+      "Chiama SEMPRE il tool salva_articolo con il contenuto generato.",
     messages: [
       {
         role: "user",
-        content: `Titolo dell'articolo: "${titolo}"`,
+        content: `Scrivi un articolo per il blog di agriturismi.app con questo titolo: "${titolo}"`,
       },
     ],
   });
 
-  const testo = risposta.content[0].type === "text" ? risposta.content[0].text : "{}";
-  const normalizzato = testo
-    .trim()
-    .replace(/^```(?:json)?\s*/i, "")
-    .replace(/\s*```$/i, "")
-    .trim();
+  // Con tool_choice forced, il primo blocco è sempre tool_use
+  const toolBlock = risposta.content.find((b) => b.type === "tool_use");
+  if (!toolBlock || toolBlock.type !== "tool_use") {
+    throw new Error("Claude non ha chiamato il tool salva_articolo");
+  }
 
-  const dati = JSON.parse(normalizzato) as Partial<ArticoloGenerato>;
+  const input = toolBlock.input as Partial<ArticoloGenerato>;
 
   return {
-    html: typeof dati.html === "string" ? dati.html : "",
-    excerpt: typeof dati.excerpt === "string" ? dati.excerpt.slice(0, 160) : "",
-    og_title: typeof dati.og_title === "string" ? dati.og_title.slice(0, 60) : titolo.slice(0, 60),
-    og_description: typeof dati.og_description === "string" ? dati.og_description.slice(0, 155) : "",
-    tags: Array.isArray(dati.tags) ? dati.tags : [],
+    html: typeof input.html === "string" ? input.html : "",
+    excerpt: typeof input.excerpt === "string" ? input.excerpt.slice(0, 160) : "",
+    og_title: typeof input.og_title === "string" ? input.og_title.slice(0, 60) : titolo.slice(0, 60),
+    og_description: typeof input.og_description === "string" ? input.og_description.slice(0, 155) : "",
+    tags: Array.isArray(input.tags) ? input.tags : [],
   };
 }
 
 export async function GET(req: NextRequest) {
-  // Protezione: solo in development o con header segreto
   const secret = req.headers.get("x-seed-secret");
   if (process.env.NODE_ENV !== "development" && secret !== SEED_SECRET) {
     return NextResponse.json({ errore: "Non autorizzato" }, { status: 401 });
   }
 
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!serviceKey) {
+    return NextResponse.json(
+      { errore: "SUPABASE_SERVICE_ROLE_KEY non impostata — necessaria per bypassare le RLS" },
+      { status: 500 }
+    );
+  }
+
   const claude = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  // Client Supabase diretto (usa service role se disponibile, altrimenti anon)
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    serviceKey
   );
 
   const risultati: Array<{
