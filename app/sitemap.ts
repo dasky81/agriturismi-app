@@ -3,46 +3,62 @@ import { creaClientServer } from "@/lib/supabase-server";
 
 const BASE_URL = "https://agriturismi.app";
 
-const PAGINE_STATICHE = [
-  { url: "/", priority: 1.0, changeFrequency: "daily" as const },
-  { url: "/blog", priority: 0.8, changeFrequency: "daily" as const },
-  { url: "/agriturismi-toscana", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-umbria", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-sicilia", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-puglia", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-lazio", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-piemonte", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-veneto", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-campania", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-sardegna", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-trentino", priority: 0.9, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-con-piscina", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-per-famiglie", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-con-ristorante", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-con-spa", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-con-animali", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-vicino-al-mare", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-degustazione-vino", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-romantici", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-biologici", priority: 0.85, changeFrequency: "weekly" as const },
-  { url: "/agriturismi-con-maneggio", priority: 0.85, changeFrequency: "weekly" as const },
+const PAGINE_STATICHE: Array<{
+  url: string;
+  priority: number;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+}> = [
+  { url: "/",                    priority: 1.0, changeFrequency: "daily" },
+  { url: "/blog",                priority: 0.6, changeFrequency: "daily" },
+  { url: "/login",               priority: 0.3, changeFrequency: "monthly" },
+  { url: "/registrati",          priority: 0.3, changeFrequency: "monthly" },
+  { url: "/aggiungi-struttura",  priority: 0.5, changeFrequency: "monthly" },
+];
+
+const PAGINE_SEO: Array<{
+  url: string;
+  changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
+}> = [
+  // Regionali
+  { url: "/agriturismi-toscana",   changeFrequency: "weekly" },
+  { url: "/agriturismi-umbria",    changeFrequency: "weekly" },
+  { url: "/agriturismi-sicilia",   changeFrequency: "weekly" },
+  { url: "/agriturismi-puglia",    changeFrequency: "weekly" },
+  { url: "/agriturismi-lazio",     changeFrequency: "weekly" },
+  { url: "/agriturismi-piemonte",  changeFrequency: "weekly" },
+  { url: "/agriturismi-veneto",    changeFrequency: "weekly" },
+  { url: "/agriturismi-campania",  changeFrequency: "weekly" },
+  { url: "/agriturismi-sardegna",  changeFrequency: "weekly" },
+  { url: "/agriturismi-trentino",  changeFrequency: "weekly" },
+  // Tematiche
+  { url: "/agriturismi-con-piscina",        changeFrequency: "weekly" },
+  { url: "/agriturismi-per-famiglie",       changeFrequency: "weekly" },
+  { url: "/agriturismi-con-ristorante",     changeFrequency: "weekly" },
+  { url: "/agriturismi-con-spa",            changeFrequency: "weekly" },
+  { url: "/agriturismi-con-animali",        changeFrequency: "weekly" },
+  { url: "/agriturismi-vicino-al-mare",     changeFrequency: "weekly" },
+  { url: "/agriturismi-degustazione-vino",  changeFrequency: "weekly" },
+  { url: "/agriturismi-romantici",          changeFrequency: "weekly" },
+  { url: "/agriturismi-biologici",          changeFrequency: "weekly" },
+  { url: "/agriturismi-con-maneggio",       changeFrequency: "weekly" },
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await creaClientServer();
 
   const [{ data: agriturismi }, { data: post }] = await Promise.all([
-    supabase
-      .from("agriturismi")
-      .select("slug, updated_at")
-      .eq("attivo", true),
-    supabase
-      .from("post")
-      .select("slug, updated_at")
-      .eq("pubblicato", true),
+    supabase.from("agriturismi").select("slug, updated_at").eq("attivo", true),
+    supabase.from("post").select("slug, updated_at").eq("pubblicato", true),
   ]);
 
-  const pagineSEO: MetadataRoute.Sitemap = PAGINE_STATICHE.map((p) => ({
+  const pagineSEO: MetadataRoute.Sitemap = PAGINE_SEO.map((p) => ({
+    url: `${BASE_URL}${p.url}`,
+    lastModified: new Date(),
+    changeFrequency: p.changeFrequency,
+    priority: 0.8,
+  }));
+
+  const pagineStatiche: MetadataRoute.Sitemap = PAGINE_STATICHE.map((p) => ({
     url: `${BASE_URL}${p.url}`,
     lastModified: new Date(),
     changeFrequency: p.changeFrequency,
@@ -63,5 +79,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  return [...pagineSEO, ...pagineAgriturismo, ...paginePost];
+  return [...pagineStatiche, ...pagineSEO, ...pagineAgriturismo, ...paginePost];
 }

@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Sparkles, X, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import { creaClientBrowser } from "@/lib/supabase";
-import type { FiltriRicerca } from "@/lib/claude";
 import type { Agriturismo } from "@/types";
 
 // ── Categorie tab ──────────────────────────────────────────────
@@ -140,6 +139,7 @@ function HomeInterna() {
   async function cercaConAI(q: string) {
     if (!q.trim()) return;
     setCaricandoAI(true);
+    setCaricandoGrid(true);
     setMessaggioErrore("");
     try {
       const risposta = await fetch("/api/ricerca", {
@@ -148,22 +148,13 @@ function HomeInterna() {
         body: JSON.stringify({ query: q }),
       });
       if (!risposta.ok) throw new Error(`Errore ${risposta.status}`);
-      const dati = (await risposta.json()) as { filtri: FiltriRicerca };
-      const filtri = dati.filtri;
-
-      setCaricandoGrid(true);
-      let query = supabase.from("agriturismi").select("*").eq("attivo", true);
-      if (filtri.regione) query = query.ilike("regione", filtri.regione);
-      else if (filtri.provincia) query = query.ilike("provincia", filtri.provincia);
-      if (filtri.servizi.length > 0) query = query.overlaps("servizi", filtri.servizi);
-      if (filtri.tipo_ospitalita.length > 0) query = query.overlaps("tipo_ospitalita", filtri.tipo_ospitalita);
-      const { data } = await query.limit(24);
-      setAgriturismi((data ?? []) as AgriturismoCon[]);
-      setCaricandoGrid(false);
+      const dati = (await risposta.json()) as { risultati: AgriturismoCon[] };
+      setAgriturismi(dati.risultati ?? []);
     } catch {
       setMessaggioErrore("Si è verificato un errore. Riprova.");
     } finally {
       setCaricandoAI(false);
+      setCaricandoGrid(false);
     }
   }
 
@@ -329,7 +320,9 @@ function HomeInterna() {
             <p className="text-sm text-gray-500 mb-6">
               {mostraVicino
                 ? `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"} vicino a te`
-                : `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"}${categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}`}
+                : mostraAI
+                  ? `${agriturismi.length} agriturism${agriturismi.length === 1 ? "o" : "i"} trovati`
+                  : `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"}${categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {agriturismi.map((a) => (
