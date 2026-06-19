@@ -245,7 +245,7 @@ function HomeInterna() {
                 {geoLoading
                   ? <Loader2 size={15} className="animate-spin" />
                   : <MapPin size={15} />}
-                📍 Vicino a me
+                Vicino a me
               </button>
             </div>
           </form>

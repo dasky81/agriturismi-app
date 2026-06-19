@@ -66,7 +66,7 @@ export default function AgriCard({ agriturismo: a, distanza_km }: Props) {
         onKeyDown={(e) => e.key === "Enter" && router.push(`/agriturismo/${a.slug}`)}
       >
         {/* Foto 4/3 */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 mb-3">
+        <div className="relative aspect-[3/2] sm:aspect-[4/3] overflow-hidden rounded-2xl bg-gray-100 mb-3">
           {a.foto_principale ? (
             <Image
               src={a.foto_principale}
