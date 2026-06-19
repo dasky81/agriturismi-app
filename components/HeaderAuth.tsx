@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogOut, User, Menu, X, Shield } from "lucide-react";
+import { LogOut, User, Menu, X, Shield, Settings } from "lucide-react";
 import { esci } from "@/lib/auth";
 
 interface Props {
@@ -31,6 +31,18 @@ export default function HeaderAuth({ utente }: Props) {
     <>
       {/* ── PILL HAMBURGER ─────────────────────────────────────────── */}
       <div className="flex items-center gap-2">
+
+        {/* Admin link desktop */}
+        {utente && isAdmin && (
+          <Link
+            href="/admin"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#E8956D" }}
+          >
+            <Settings size={13} />
+            Admin
+          </Link>
+        )}
 
         {/* Desktop CTA (solo se non loggato) */}
         {!utente && (

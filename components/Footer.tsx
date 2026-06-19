@@ -65,6 +65,7 @@ export default function Footer() {
               {[
                 { href: "/login", label: "Accedi" },
                 { href: "/registrati", label: "Registrati" },
+                { href: "/contatti", label: "Contatti" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link
