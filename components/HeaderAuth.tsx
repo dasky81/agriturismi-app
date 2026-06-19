@@ -79,9 +79,9 @@ export default function HeaderAuth({ utente }: Props) {
       {/* ── MOBILE MENU ────────────────────────────────────────────── */}
       {isMenuOpen && (
         <>
-          {/* Overlay chiudi-menu */}
+          {/* Overlay chiudi-menu — parte sotto l'header per non bloccare il pulsante hamburger */}
           <div
-            className="fixed inset-0 z-30"
+            className="fixed inset-x-0 top-20 bottom-0 z-30"
             aria-hidden="true"
             onClick={closeMenu}
           />

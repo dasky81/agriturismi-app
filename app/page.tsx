@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { Search, Loader2, Sparkles, X, MapPin } from "lucide-react";
+import { Search, Loader2, Sparkles, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import { creaClientBrowser } from "@/lib/supabase";
 import type { Agriturismo } from "@/types";
@@ -52,6 +52,7 @@ function HomeInterna() {
   const [geoLoading, setGeoLoading] = useState(false);
 
   const supabase = creaClientBrowser();
+  const mostraVicino = vicinoPar.length > 0;
 
   const caricaPerCategoria = useCallback(
     async (cat: Categoria) => {
@@ -128,7 +129,7 @@ function HomeInterna() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [vicinoPar]);
 
-  // Se c'è query iniziale dall'header, avvia ricerca AI
+  // Avvia ricerca AI se c'è query iniziale dall'header
   useEffect(() => {
     if (queryIniziale) {
       void cercaConAI(queryIniziale);
@@ -141,6 +142,7 @@ function HomeInterna() {
     setCaricandoAI(true);
     setCaricandoGrid(true);
     setMessaggioErrore("");
+    setMostraAI(true);
     try {
       const risposta = await fetch("/api/ricerca", {
         method: "POST",
@@ -163,26 +165,12 @@ function HomeInterna() {
     void cercaConAI(queryAI);
   }
 
-  function chiudiAI() {
-    setMostraAI(false);
-    setQueryAI("");
-    setMessaggioErrore("");
-    void caricaPerCategoria(categoriaAttiva);
-  }
-
   function handleTabClick(cat: Categoria) {
     setCategoriaAttiva(cat);
-    if (mostraAI) {
-      setMostraAI(false);
-      setQueryAI("");
-    }
-    if (vicinoPar) {
-      router.replace("/");
-    }
+    if (mostraAI) setMostraAI(false);
+    if (vicinoPar) router.replace("/");
     setMessaggioErrore("");
   }
-
-  const mostraVicino = vicinoPar.length > 0;
 
   return (
     <div className="flex flex-col flex-1 bg-white">
@@ -205,87 +193,68 @@ function HomeInterna() {
                 <span>{cat.label}</span>
               </button>
             ))}
-
-            {/* Divider */}
-            <div className="self-stretch w-px bg-gray-200 mx-2 shrink-0" />
-
-            {/* Bottone Vicino a me */}
-            <button
-              onClick={handleGeoButton}
-              disabled={geoLoading}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-all shrink-0 disabled:opacity-60 ${
-                mostraVicino
-                  ? "border-[#2D6A4F] bg-[#2D6A4F] text-white"
-                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {geoLoading ? <Loader2 size={13} className="animate-spin" /> : <MapPin size={13} />}
-              Vicino a me
-            </button>
-
-            {/* Divider */}
-            <div className="self-stretch w-px bg-gray-200 mx-2 shrink-0" />
-
-            {/* Bottone AI search */}
-            <button
-              onClick={() => setMostraAI(!mostraAI)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-xs font-semibold border transition-all shrink-0 ${
-                mostraAI
-                  ? "border-[#2D6A4F] bg-[#2D6A4F] text-white"
-                  : "border-gray-200 text-[#2D6A4F] hover:bg-gray-50"
-              }`}
-            >
-              <Sparkles size={13} />
-              Cerca con AI
-            </button>
           </div>
         </div>
       </div>
 
-      {/* ── AI SEARCH ESPANSO ─────────────────────────────────── */}
-      {mostraAI && (
-        <div className="border-b bg-[#F7F7F7] py-6" style={{ borderColor: "#DDDDDD" }}>
-          <div className="max-w-2xl mx-auto px-4">
-            <form onSubmit={handleAISubmit} className="flex gap-2">
-              <div className="relative flex-1">
-                <Sparkles
-                  size={16}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D6A4F] shrink-0"
-                />
-                <input
-                  type="text"
-                  value={queryAI}
-                  onChange={(e) => setQueryAI(e.target.value)}
-                  placeholder="es. Agriturismo romantico con piscina in Toscana per 2 persone..."
-                  autoFocus
-                  className="w-full pl-10 pr-4 py-3.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition"
-                  style={{ borderColor: "#DDDDDD" }}
-                />
-              </div>
+      {/* ── SEARCH BAR AI — sempre visibile su tutti i device ───── */}
+      <div className="border-b bg-[#F7F7F7] py-4" style={{ borderColor: "#DDDDDD" }}>
+        <div className="max-w-2xl mx-auto px-4">
+          <form onSubmit={handleAISubmit} className="flex flex-col gap-2">
+
+            {/* Input — sempre full width */}
+            <div className="relative">
+              <Sparkles
+                size={16}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#2D6A4F] shrink-0 pointer-events-none"
+              />
+              <input
+                type="text"
+                value={queryAI}
+                onChange={(e) => setQueryAI(e.target.value)}
+                placeholder="es. Agriturismo romantico con piscina in Toscana per 2 persone..."
+                className="w-full pl-10 pr-4 py-3.5 rounded-xl border bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition"
+                style={{ borderColor: "#DDDDDD" }}
+              />
+            </div>
+
+            {/* Bottoni: stacked su mobile, inline su ≥sm */}
+            <div className="flex flex-col sm:flex-row gap-2">
               <button
                 type="submit"
                 disabled={caricandoAI || !queryAI.trim()}
-                className="px-5 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center gap-2 shrink-0"
+                className="w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-white text-sm transition-opacity hover:opacity-90 disabled:opacity-40 flex items-center justify-center gap-2"
                 style={{ backgroundColor: "#2D6A4F" }}
               >
-                {caricandoAI ? <Loader2 size={15} className="animate-spin" /> : <Search size={15} />}
-                {caricandoAI ? "Analisi..." : "Cerca"}
+                {caricandoAI
+                  ? <Loader2 size={15} className="animate-spin" />
+                  : <Search size={15} />}
+                {caricandoAI ? "Analisi in corso..." : "Cerca con AI"}
               </button>
+
               <button
                 type="button"
-                onClick={chiudiAI}
-                className="p-3 rounded-xl border text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-                style={{ borderColor: "#DDDDDD" }}
+                onClick={handleGeoButton}
+                disabled={geoLoading}
+                className={`w-full sm:w-auto px-6 py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 border transition-all disabled:opacity-60 ${
+                  mostraVicino
+                    ? "border-[#2D6A4F] bg-[#2D6A4F] text-white"
+                    : "border-gray-200 text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                <X size={16} />
+                {geoLoading
+                  ? <Loader2 size={15} className="animate-spin" />
+                  : <MapPin size={15} />}
+                📍 Vicino a me
               </button>
-            </form>
-            <p className="mt-2 text-xs text-gray-400 text-center">
-              Descrivi liberamente la tua vacanza ideale — l&apos;AI troverà le strutture più adatte.
-            </p>
-          </div>
+            </div>
+          </form>
+
+          <p className="mt-2 text-xs text-gray-400 text-center">
+            Descrivi la tua vacanza ideale — l&apos;AI trova le strutture più adatte.
+          </p>
         </div>
-      )}
+      </div>
 
       {/* ── GRIGLIA AGRITURISMI ──────────────────────────────────── */}
       <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
@@ -302,18 +271,20 @@ function HomeInterna() {
         ) : agriturismi.length === 0 ? (
           <div className="text-center py-24">
             <p className="text-5xl mb-4">
-              {mostraVicino ? "📍" : "🌿"}
+              {mostraVicino ? "📍" : mostraAI ? "✨" : "🌿"}
             </p>
             <p className="font-semibold text-gray-700 mb-1">
               {mostraVicino
                 ? "Nessun agriturismo entro 15 km da te"
-                : "Nessun agriturismo trovato"}
+                : mostraAI
+                  ? "Nessun agriturismo trovato per questa ricerca. Prova con termini diversi."
+                  : "Nessun agriturismo trovato"}
             </p>
-            <p className="text-sm text-gray-400">
-              {mostraVicino
-                ? "Prova ad allargare la ricerca o usa i filtri per categoria."
-                : "Prova a selezionare una categoria diversa o usa la ricerca AI."}
-            </p>
+            {!mostraAI && !mostraVicino && (
+              <p className="text-sm text-gray-400">
+                Prova a selezionare una categoria diversa o descrivi la tua ricerca sopra.
+              </p>
+            )}
           </div>
         ) : (
           <>
@@ -322,7 +293,9 @@ function HomeInterna() {
                 ? `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"} vicino a te`
                 : mostraAI
                   ? `${agriturismi.length} agriturism${agriturismi.length === 1 ? "o" : "i"} trovati`
-                  : `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"}${categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"}`}
+                  : `${agriturismi.length} struttur${agriturismi.length === 1 ? "a" : "e"}${
+                      categoriaAttiva.id !== "all" ? ` · ${categoriaAttiva.label}` : " in tutta Italia"
+                    }`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {agriturismi.map((a) => (

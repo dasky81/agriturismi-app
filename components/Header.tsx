@@ -23,7 +23,7 @@ export default async function Header() {
   }
 
   return (
-    <header className="sticky top-0 z-50 border-b bg-white/95 backdrop-blur-md" style={{ borderColor: "#DDDDDD" }}>
+    <header className="sticky top-0 z-50 border-b bg-white" style={{ borderColor: "#DDDDDD" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
 
         {/* ── LOGO ─────────────────────────────────────────────── */}
@@ -46,7 +46,7 @@ export default async function Header() {
               strokeLinecap="round"
             />
           </svg>
-          <span className="text-base font-bold tracking-tight text-gray-900 hidden sm:block">
+          <span className="text-base font-bold tracking-tight text-gray-900">
             agriturismi.app
           </span>
         </Link>
