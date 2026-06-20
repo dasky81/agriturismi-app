@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import SezioneMeteo from "@/components/SezioneMeteo";
 
 export const metadata: Metadata = {
   title: "Per gestori di agriturismo — agriturismi.app",
@@ -271,6 +272,8 @@ export default function PerGestoriPage() {
           </div>
         </div>
       </section>
+
+      <SezioneMeteo />
 
       {/* ── CTA FINALE ───────────────────────────────────────────────── */}
       <section className="max-w-2xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">

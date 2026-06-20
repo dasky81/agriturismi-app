@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { creaClientServer } from "@/lib/supabase-server";
 import { PostConAutore } from "@/types";
+import SezioneMeteo from "@/components/SezioneMeteo";
 
 export const metadata: Metadata = {
   title: "Blog — Agriturismi.app",
@@ -144,6 +145,8 @@ export default async function BlogPage() {
           </div>
         )}
       </main>
+
+      <SezioneMeteo />
 
     </div>
   );

@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import SezioneMeteo from "@/components/SezioneMeteo";
 import {
   MapPin, Phone, Mail, Globe, ExternalLink,
   Waves, UtensilsCrossed, Wifi, Car, PawPrint,
@@ -404,6 +405,8 @@ export default async function SchedaAgriturismo({ params }: Params) {
           </aside>
         </div>
       </div>
+
+      <SezioneMeteo />
 
     </div>
   );

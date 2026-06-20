@@ -5,7 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Sparkles, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import HeroSlideshow from "@/components/HeroSlideshow";
-import WidgetMeteo from "@/components/WidgetMeteo";
+import SezioneMeteo from "@/components/SezioneMeteo";
 import { creaClientBrowser } from "@/lib/supabase";
 import { useInView } from "@/hooks/useInView";
 import type { Agriturismo } from "@/types";
@@ -323,7 +323,7 @@ function HomeInterna() {
         )}
       </main>
 
-      <WidgetMeteo />
+      <SezioneMeteo />
 
     </div>
   );

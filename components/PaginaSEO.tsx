@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { creaClientServer } from "@/lib/supabase-server";
 import AgriCard from "./AgriCard";
+import SezioneMeteo from "./SezioneMeteo";
 import type { Agriturismo } from "@/types";
 
 export interface ConfigPaginaSEO {
@@ -160,6 +161,9 @@ export default async function PaginaSEO({ config }: Props) {
           </div>
         </div>
       </section>
+
+      {/* ── METEO ───────────────────────────────────────────────── */}
+      <SezioneMeteo />
 
       {/* ── LINK CORRELATI ──────────────────────────────────────── */}
       {config.correlate.length > 0 && (
