@@ -245,11 +245,11 @@ export default function WidgetMeteo() {
   const datiAttivi = meteoDest ?? meteoLocale;
 
   return (
-    <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-100">
-      <div className="grid lg:grid-cols-[300px_1fr]">
+    <div className="w-full rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+      <div className="grid min-w-0 lg:grid-cols-[300px_1fr]">
 
         {/* ── SINISTRA — Meteo posizione attuale ─────────────────── */}
-        <div className="flex flex-col gap-5 p-5 sm:p-7" style={{ backgroundColor: "#0F172A" }}>
+        <div className="flex flex-col gap-5 p-5 sm:p-7 min-w-0" style={{ backgroundColor: "#0F172A" }}>
 
           {/* Branding */}
           <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 whitespace-nowrap">
@@ -347,25 +347,25 @@ export default function WidgetMeteo() {
         </div>
 
         {/* ── DESTRA — Cerca destinazione + Previsioni ────────────── */}
-        <div className="flex flex-col gap-6 p-5 sm:p-7 bg-white">
+        <div className="flex flex-col gap-6 p-5 sm:p-7 bg-white min-w-0">
 
           {/* Form ricerca */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
               Cerca destinazione
             </p>
-            <form onSubmit={(e) => void handleCerca(e)} className="flex flex-col sm:flex-row gap-2">
+            <form onSubmit={(e) => void handleCerca(e)} className="flex flex-col gap-2">
               <input
                 type="text"
                 value={inputCerca}
                 onChange={(e) => setInputCerca(e.target.value)}
                 placeholder="es. Firenze, Taormina, Alberobello…"
-                className="w-full flex-1 px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition min-w-0"
+                className="block w-full px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition min-w-0"
               />
               <button
                 type="submit"
                 disabled={!inputCerca.trim() || statoCerca === "loading"}
-                className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
+                className="block w-full flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
                 style={{ backgroundColor: "#2D6A4F" }}
               >
                 {statoCerca === "loading" ? (

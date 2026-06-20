@@ -3,7 +3,7 @@ import WidgetMeteo from "./WidgetMeteo";
 export default function SezioneMeteo() {
   return (
     <section style={{ backgroundColor: "#F0FDF4" }} className="py-14">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 overflow-hidden w-full">
 
         {/* Intestazione */}
         <div className="text-center mb-8">
