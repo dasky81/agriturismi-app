@@ -80,6 +80,30 @@ export default function Footer() {
           </div>
         </div>
 
+        {/* Rete viaggi.app */}
+        <div
+          className="border-t pt-6 pb-4 text-center"
+          style={{ borderColor: "#DDDDDD" }}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
+            Rete viaggi.app
+          </p>
+          <div className="flex items-center justify-center gap-5 flex-wrap">
+            {["agriturismi.app", "spiagge.app", "borghi.app", "montagna.app"].map((site) => (
+              <span
+                key={site}
+                className={`text-xs font-medium ${
+                  site === "agriturismi.app"
+                    ? "text-[#2D6A4F] font-semibold"
+                    : "text-gray-400"
+                }`}
+              >
+                {site}
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Bottom bar */}
         <div
           className="border-t pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3"
@@ -94,7 +118,10 @@ export default function Footer() {
               <path d="M15 2C15 2 15 13 10.5 20" stroke="#52B788" strokeWidth="1.6" strokeLinecap="round" />
               <path d="M15 2C15 2 15 15 19.5 21" stroke="#52B788" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
-            <span className="text-sm font-semibold text-gray-900">agriturismi.app</span>
+            <div>
+              <span className="text-sm font-semibold text-gray-900 block leading-tight">agriturismi.app</span>
+              <span className="text-[10px] text-gray-400 leading-none">by viaggi.app</span>
+            </div>
           </div>
           <p className="text-xs text-gray-400">
             © 2026 agriturismi.app — Tutti i diritti riservati · Made in Italy 🇮🇹

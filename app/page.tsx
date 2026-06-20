@@ -5,7 +5,9 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Search, Loader2, Sparkles, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import HeroSlideshow from "@/components/HeroSlideshow";
+import WidgetMeteo from "@/components/WidgetMeteo";
 import { creaClientBrowser } from "@/lib/supabase";
+import { useInView } from "@/hooks/useInView";
 import type { Agriturismo } from "@/types";
 
 // ── Categorie tab ──────────────────────────────────────────────
@@ -54,6 +56,7 @@ function HomeInterna() {
 
   const supabase = creaClientBrowser();
   const mostraVicino = vicinoPar.length > 0;
+  const { ref: gridRef, inView: gridInView } = useInView<HTMLElement>(0.05);
 
   const caricaPerCategoria = useCallback(
     async (cat: Categoria) => {
@@ -189,12 +192,12 @@ function HomeInterna() {
                 <button
                   key={cat.id}
                   onClick={() => handleTabClick(cat)}
-                  className={`tab-fade-in flex flex-col items-center gap-1 px-5 py-3 text-sm font-medium whitespace-nowrap shrink-0 snap-center rounded-xl border transition-all duration-200 hover:scale-[1.02] ${
+                  className={`animate-slide-left flex flex-col items-center gap-1 px-5 py-3 text-sm font-medium whitespace-nowrap shrink-0 snap-center rounded-xl border-2 transition-all duration-200 hover:scale-[1.02] ${
                     attivo
                       ? "border-[#2D6A4F] text-[#2D6A4F] scale-105 shadow-md bg-white"
                       : "border-transparent text-[#717171] hover:text-[#222222] hover:border-gray-200"
                   }`}
-                  style={{ animationDelay: `${i * 40}ms` }}
+                  style={{ animationDelay: `${i * 50}ms` }}
                 >
                   <span className="text-2xl">{cat.emoji}</span>
                   <span>{cat.label}</span>
@@ -265,7 +268,7 @@ function HomeInterna() {
       </div>
 
       {/* ── GRIGLIA AGRITURISMI ──────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
+      <main ref={gridRef} className="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
         {messaggioErrore && (
           <p className="mb-4 text-sm text-red-600 bg-red-50 px-4 py-3 rounded-xl">
             {messaggioErrore}
@@ -306,13 +309,21 @@ function HomeInterna() {
                     }`}
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {agriturismi.map((a) => (
-                <AgriCard key={a.id} agriturismo={a} distanza_km={a.distanza_km} />
+              {agriturismi.map((a, i) => (
+                <div
+                  key={a.id}
+                  className={gridInView ? "animate-fade-in-up" : "opacity-0"}
+                  style={{ animationDelay: `${i * 50}ms` }}
+                >
+                  <AgriCard agriturismo={a} distanza_km={a.distanza_km} />
+                </div>
               ))}
             </div>
           </>
         )}
       </main>
+
+      <WidgetMeteo />
 
     </div>
   );

@@ -46,9 +46,12 @@ export default async function Header() {
               strokeLinecap="round"
             />
           </svg>
-          <span className="text-base font-bold tracking-tight text-gray-900">
-            agriturismi.app
-          </span>
+          <div>
+            <span className="text-base font-bold tracking-tight text-gray-900 block leading-tight">
+              agriturismi.app
+            </span>
+            <span className="text-[10px] text-gray-400 leading-none">by viaggi.app</span>
+          </div>
         </Link>
 
         {/* ── BARRA RICERCA CENTRALE ────────────────────────── */}

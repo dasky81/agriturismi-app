@@ -64,8 +64,14 @@ export default function AdminStrutture() {
   async function elimina(s: Struttura) {
     if (!confirm(`Eliminare "${s.nome}"? L'operazione è irreversibile.`)) return;
     setBusy(s.id + "_del");
-    await supabase.from("agriturismi").delete().eq("id", s.id);
-    setStrutture((prev) => prev.filter((x) => x.id !== s.id));
+    const res = await fetch("/api/admin/elimina-struttura", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: s.id }),
+    });
+    if (res.ok) {
+      setStrutture((prev) => prev.filter((x) => x.id !== s.id));
+    }
     setBusy(null);
   }
 

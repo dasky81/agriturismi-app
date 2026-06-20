@@ -1,95 +1,355 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { creaClientServer } from "@/lib/supabase-server";
-import { BookOpen, PlusCircle } from "lucide-react";
+import { Heart, Search, Home, User, LogOut, ChevronRight, MapPin } from "lucide-react";
+import { creaClientBrowser } from "@/lib/supabase";
 
-export default async function DashboardPage() {
-  const supabase = await creaClientServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+interface ProfiloUtente {
+  id: string;
+  nome: string | null;
+  cognome: string | null;
+  ruolo: string;
+  email: string;
+}
 
-  const { data: profilo } = await supabase
-    .from("profiles")
-    .select("nome, cognome, ruolo")
-    .eq("id", user!.id)
-    .single();
+interface AgriPref {
+  id: string;
+  nome: string;
+  regione: string | null;
+  slug: string;
+}
 
-  const { count: totalePost } = await supabase
-    .from("post")
-    .select("*", { count: "exact", head: true })
-    .eq("autore_id", user!.id);
+interface Preferito {
+  id: string;
+  agriturismo_id: string;
+  created_at: string;
+  agriturismi: AgriPref | null;
+}
 
-  const { count: totalePublicati } = await supabase
-    .from("post")
-    .select("*", { count: "exact", head: true })
-    .eq("autore_id", user!.id)
-    .eq("pubblicato", true);
+interface Ricerca {
+  id: string;
+  query_utente: string;
+  created_at: string;
+}
 
-  const nomeUtente =
-    profilo?.nome
-      ? `${profilo.nome} ${profilo.cognome ?? ""}`.trim()
-      : "Utente";
+interface StrutturaUtente {
+  id: string;
+  nome: string;
+  slug: string;
+  verificato: boolean;
+}
+
+export default function DashboardPage() {
+  const [profilo, setProfilo] = useState<ProfiloUtente | null>(null);
+  const [preferiti, setPreferiti] = useState<Preferito[]>([]);
+  const [ricerche, setRicerche] = useState<Ricerca[]>([]);
+  const [struttura, setStruttura] = useState<StrutturaUtente | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [profileSaved, setProfileSaved] = useState(false);
+  const [formNome, setFormNome] = useState("");
+  const [formCognome, setFormCognome] = useState("");
+
+  useEffect(() => {
+    const sb = creaClientBrowser();
+
+    async function carica() {
+      const { data: { user } } = await sb.auth.getUser();
+      if (!user) return;
+
+      const { data: prof } = await sb
+        .from("profiles")
+        .select("nome, cognome, ruolo")
+        .eq("id", user.id)
+        .single();
+
+      setProfilo({
+        id: user.id,
+        nome: prof?.nome ?? null,
+        cognome: prof?.cognome ?? null,
+        ruolo: prof?.ruolo ?? "visitatore",
+        email: user.email ?? "",
+      });
+      setFormNome(prof?.nome ?? "");
+      setFormCognome(prof?.cognome ?? "");
+
+      const { data: prefs } = await sb
+        .from("preferiti")
+        .select("id, agriturismo_id, created_at, agriturismi(id, nome, regione, slug)")
+        .eq("utente_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(10);
+      if (prefs) setPreferiti(prefs as unknown as Preferito[]);
+
+      const { data: rice } = await sb
+        .from("ricerche_log")
+        .select("id, query_utente, created_at")
+        .eq("utente_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (rice) setRicerche(rice as Ricerca[]);
+
+      if (prof?.ruolo === "proprietario" || prof?.ruolo === "admin") {
+        const { data: strutt } = await sb
+          .from("agriturismi")
+          .select("id, nome, slug, verificato")
+          .eq("proprietario_id", user.id)
+          .maybeSingle();
+        if (strutt) setStruttura(strutt as StrutturaUtente);
+      }
+
+      setLoading(false);
+    }
+
+    void carica();
+  }, []);
+
+  async function salvaProfilo(e: React.FormEvent) {
+    e.preventDefault();
+    if (!profilo) return;
+    setSavingProfile(true);
+    const sb = creaClientBrowser();
+    await sb.from("profiles").update({
+      nome: formNome.trim() || null,
+      cognome: formCognome.trim() || null,
+    }).eq("id", profilo.id);
+    setProfilo((p) => p ? { ...p, nome: formNome, cognome: formCognome } : p);
+    setProfileSaved(true);
+    setTimeout(() => setProfileSaved(false), 3000);
+    setSavingProfile(false);
+  }
+
+  async function logout() {
+    const sb = creaClientBrowser();
+    await sb.auth.signOut();
+    window.location.href = "/";
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="w-6 h-6 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  const iniziali =
+    [profilo?.nome, profilo?.cognome]
+      .filter(Boolean)
+      .map((n) => n![0].toUpperCase())
+      .join("") || (profilo?.email[0]?.toUpperCase() ?? "U");
+
+  const nomeCompleto =
+    [profilo?.nome, profilo?.cognome].filter(Boolean).join(" ") || "Utente";
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">
-        Benvenuto, {nomeUtente}
-      </h1>
-      <p className="text-gray-400 text-sm mb-8">
-        Gestisci i tuoi contenuti su Agriturismi.app
-      </p>
+    <div className="flex flex-col gap-6 max-w-2xl">
 
-      {/* Statistiche rapide */}
-      <div className="grid sm:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">
-            Post totali
-          </p>
-          <p className="text-3xl font-bold text-gray-900">{totalePost ?? 0}</p>
+      {/* Header avatar */}
+      <div className="flex items-center gap-4">
+        <div
+          className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0"
+          style={{ background: "linear-gradient(135deg, #1B4332, #2D6A4F)" }}
+        >
+          {iniziali}
         </div>
-        <div className="bg-white rounded-2xl border border-gray-100 p-5">
-          <p className="text-xs text-gray-400 font-medium uppercase tracking-wider mb-1">
-            Pubblicati
-          </p>
-          <p className="text-3xl font-bold text-[#2D6A4F]">
-            {totalePublicati ?? 0}
-          </p>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Ciao {nomeCompleto}! 👋</h1>
+          <p className="text-sm text-gray-400">Benvenuto nella tua area personale</p>
         </div>
       </div>
 
-      {/* Azioni rapide */}
-      <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">
-        Azioni rapide
-      </h2>
-      <div className="grid sm:grid-cols-2 gap-3">
-        <Link
-          href="/dashboard/post"
-          className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-sm transition-shadow"
-        >
-          <div className="w-10 h-10 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
-            <BookOpen size={18} className="text-[#2D6A4F]" />
+      {/* 1. Preferiti */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <Heart size={16} className="text-[#E8956D]" />
+          I miei preferiti
+        </h2>
+        {preferiti.length === 0 ? (
+          <div className="text-center py-6">
+            <p className="text-2xl mb-2">🌿</p>
+            <p className="text-sm text-gray-500 mb-3">Nessun agriturismo salvato ancora</p>
+            <Link
+              href="/"
+              className="inline-flex items-center gap-1 text-sm font-semibold text-[#2D6A4F] hover:underline"
+            >
+              Esplora gli agriturismi
+              <ChevronRight size={14} />
+            </Link>
           </div>
-          <div>
-            <p className="font-medium text-gray-900 text-sm">Gestisci post</p>
-            <p className="text-xs text-gray-400">Modifica e pubblica articoli</p>
+        ) : (
+          <div className="flex flex-col divide-y divide-gray-50">
+            {preferiti.map((p) => {
+              const agri = p.agriturismi;
+              if (!agri) return null;
+              return (
+                <Link
+                  key={p.id}
+                  href={`/agriturismo/${agri.slug}`}
+                  className="flex items-center justify-between py-3 hover:opacity-70 transition-opacity"
+                >
+                  <div>
+                    <p className="font-medium text-sm text-gray-900">{agri.nome}</p>
+                    {agri.regione && (
+                      <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                        <MapPin size={10} />
+                        {agri.regione}
+                      </p>
+                    )}
+                  </div>
+                  <ChevronRight size={16} className="text-gray-300 shrink-0" />
+                </Link>
+              );
+            })}
           </div>
-        </Link>
+        )}
+      </section>
 
-        <Link
-          href="/dashboard/post/nuovo"
-          className="flex items-center gap-3 bg-white border border-gray-100 rounded-2xl p-4 hover:shadow-sm transition-shadow"
-        >
-          <div className="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center shrink-0">
-            <PlusCircle size={18} className="text-purple-600" />
+      {/* 2. Ultime ricerche */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <Search size={16} className="text-[#2D6A4F]" />
+          Le mie ultime ricerche
+        </h2>
+        {ricerche.length === 0 ? (
+          <p className="text-sm text-gray-400 text-center py-4">
+            Nessuna ricerca effettuata ancora
+          </p>
+        ) : (
+          <div className="flex flex-col divide-y divide-gray-50">
+            {ricerche.map((r) => (
+              <div key={r.id} className="flex items-center justify-between py-3">
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm text-gray-900 truncate">&ldquo;{r.query_utente}&rdquo;</p>
+                  <p className="text-xs text-gray-400 mt-0.5">
+                    {new Date(r.created_at).toLocaleDateString("it-IT", {
+                      day: "numeric",
+                      month: "short",
+                    })}
+                  </p>
+                </div>
+                <Link
+                  href={`/?q=${encodeURIComponent(r.query_utente)}`}
+                  className="ml-3 shrink-0 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                >
+                  Ripeti
+                </Link>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* 3. La mia struttura (solo proprietario/admin) */}
+      {(profilo?.ruolo === "proprietario" || profilo?.ruolo === "admin") && (
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+            <Home size={16} className="text-[#2D6A4F]" />
+            La mia struttura
+          </h2>
+          {struttura ? (
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium text-gray-900">{struttura.nome}</p>
+                <span
+                  className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                    struttura.verificato
+                      ? "bg-green-100 text-green-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {struttura.verificato ? "✓ Verificata" : "⏳ In attesa di verifica"}
+                </span>
+              </div>
+              <Link
+                href={`/agriturismo/${struttura.slug}`}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ backgroundColor: "#2D6A4F" }}
+              >
+                Vedi scheda
+                <ChevronRight size={14} />
+              </Link>
+            </div>
+          ) : (
+            <div className="text-center py-4">
+              <p className="text-sm text-gray-500 mb-3">Nessuna struttura collegata al tuo account</p>
+              <Link
+                href="/aggiungi-struttura"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                style={{ backgroundColor: "#2D6A4F" }}
+              >
+                <Home size={14} />
+                Aggiungi il tuo agriturismo
+              </Link>
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* 4. Il mio profilo */}
+      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+        <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+          <User size={16} className="text-[#2D6A4F]" />
+          Il mio profilo
+        </h2>
+        <form onSubmit={(e) => void salvaProfilo(e)} className="flex flex-col gap-4">
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Nome</label>
+              <input
+                type="text"
+                value={formNome}
+                onChange={(e) => setFormNome(e.target.value)}
+                placeholder="Il tuo nome"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-medium text-gray-500 mb-1 block">Cognome</label>
+              <input
+                type="text"
+                value={formCognome}
+                onChange={(e) => setFormCognome(e.target.value)}
+                placeholder="Il tuo cognome"
+                className="w-full px-3 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#2D6A4F]"
+              />
+            </div>
           </div>
           <div>
-            <p className="font-medium text-gray-900 text-sm">Nuovo post</p>
-            <p className="text-xs text-gray-400">
-              Scrivi o genera con l&apos;AI
-            </p>
+            <label className="text-xs font-medium text-gray-500 mb-1 block">Email</label>
+            <input
+              type="email"
+              value={profilo?.email ?? ""}
+              disabled
+              className="w-full px-3 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-sm text-gray-400 cursor-not-allowed"
+            />
           </div>
-        </Link>
-      </div>
+          <div className="flex items-center gap-3">
+            <button
+              type="submit"
+              disabled={savingProfile}
+              className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+              style={{ backgroundColor: "#2D6A4F" }}
+            >
+              {savingProfile ? "Salvataggio…" : "Salva modifiche"}
+            </button>
+            {profileSaved && (
+              <span className="text-sm text-green-600 font-medium">✓ Salvato!</span>
+            )}
+          </div>
+        </form>
+
+        <div className="mt-5 pt-5 border-t border-gray-100">
+          <button
+            onClick={() => void logout()}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 border border-red-100 hover:bg-red-50 transition-colors"
+          >
+            <LogOut size={14} />
+            Esci dall&apos;account
+          </button>
+        </div>
+      </section>
     </div>
   );
 }

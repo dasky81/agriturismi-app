@@ -37,7 +37,20 @@ export async function GET(request: NextRequest) {
           cognome: meta.cognome ?? null,
         });
       }
-      return NextResponse.redirect(new URL("/", origin));
+
+      // Rileva primo accesso (created_at ≈ last_sign_in_at)
+      const isFirstLogin = (() => {
+        try {
+          const created = new Date(data.user.created_at).getTime();
+          const lastSignIn = new Date(data.user.last_sign_in_at!).getTime();
+          return Math.abs(created - lastSignIn) < 5000;
+        } catch {
+          return false;
+        }
+      })();
+
+      const redirectPath = isFirstLogin ? "/auth/benvenuto?tipo=nuovo" : "/";
+      return NextResponse.redirect(new URL(redirectPath, origin));
     }
   }
 

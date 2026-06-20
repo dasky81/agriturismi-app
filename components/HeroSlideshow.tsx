@@ -65,17 +65,17 @@ export default function HeroSlideshow() {
       <div className="absolute inset-x-0 bottom-0 flex flex-col items-center text-center px-4 pb-10 sm:pb-14 gap-4">
 
         {/* Eyebrow pill */}
-        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs tracking-widest uppercase font-semibold text-white bg-[#2D6A4F]/80 border border-white/20">
+        <span className="animate-fade-in-up inline-flex items-center px-3 py-1 rounded-full text-xs tracking-widest uppercase font-semibold text-white bg-[#2D6A4F]/80 border border-white/20">
           Motore di ricerca AI · Agriturismi italiani
         </span>
 
         {/* H1 */}
-        <h1 className="text-4xl sm:text-6xl font-bold text-white drop-shadow-lg leading-tight max-w-3xl">
+        <h1 className="animate-fade-in-up delay-100 text-4xl sm:text-6xl font-bold text-white drop-shadow-lg leading-tight max-w-3xl">
           Trova il tuo angolo d&apos;Italia
         </h1>
 
         {/* Sottotitolo */}
-        <p className="text-base sm:text-xl text-white/80 max-w-xl drop-shadow">
+        <p className="animate-fade-in-up delay-200 text-base sm:text-xl text-white/80 max-w-xl drop-shadow">
           Descrivi la vacanza che sogni, l&apos;AI trova l&apos;agriturismo perfetto per te
         </p>
       </div>

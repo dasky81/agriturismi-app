@@ -52,20 +52,24 @@ export default async function DashboardLayout({
             <LayoutDashboard size={16} />
             Panoramica
           </Link>
-          <Link
-            href="/dashboard/post"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-          >
-            <BookOpen size={16} />
-            I miei post
-          </Link>
-          <Link
-            href="/dashboard/post/nuovo"
-            className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
-          >
-            <PlusCircle size={16} />
-            Nuovo post
-          </Link>
+          {(profilo?.ruolo === "admin" || profilo?.ruolo === "editor") && (
+            <>
+              <Link
+                href="/dashboard/post"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              >
+                <BookOpen size={16} />
+                I miei post
+              </Link>
+              <Link
+                href="/dashboard/post/nuovo"
+                className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              >
+                <PlusCircle size={16} />
+                Nuovo post
+              </Link>
+            </>
+          )}
         </nav>
 
         <div className="mt-auto pt-4 border-t border-gray-100">

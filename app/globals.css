@@ -66,11 +66,27 @@ body {
 .tiptap-toolbar button { transition: background-color 0.15s; }
 .tiptap-toolbar button.is-active { background-color: #2D6A4F; color: white; }
 
-/* Animazione fade-in slide-up per i tab categorie */
+/* ── Animazioni ──────────────────────────────────────────────── */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.tab-fade-in {
-  animation: fadeInUp 0.35s ease both;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.tab-fade-in          { animation: fadeInUp 0.35s ease both; }
+.animate-fade-in-up   { animation: fadeInUp 0.5s ease both; }
+.animate-fade-in      { animation: fadeIn 0.4s ease both; }
+.animate-slide-left   { animation: slideInLeft 0.4s ease both; }
+
+.delay-100 { animation-delay: 100ms; }
+.delay-200 { animation-delay: 200ms; }
+.delay-300 { animation-delay: 300ms; }
+.delay-400 { animation-delay: 400ms; }
+.delay-500 { animation-delay: 500ms; }
