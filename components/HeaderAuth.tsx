@@ -117,6 +117,13 @@ export default function HeaderAuth({ utente }: Props) {
               >
                 📖 Blog
               </Link>
+              <Link
+                href="/per-gestori"
+                onClick={closeMenu}
+                className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                🏡 Per gestori
+              </Link>
 
               {isAdmin && (
                 <Link

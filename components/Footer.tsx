@@ -1,10 +1,22 @@
 import Link from "next/link";
 
+const RETE = [
+  { label: "viaggi.app", href: "https://viaggi.app" },
+  { label: "crociera.app", href: "https://crociera.app" },
+  { label: "cantine.app", href: "https://cantine.app" },
+  { label: "green.camp", href: "https://green.camp" },
+  { label: "soggiorni.app", href: "https://soggiorni.app" },
+  { label: "noleggi.app", href: "https://noleggi.app" },
+  { label: "ristoranti.app", href: "https://ristoranti.app" },
+  { label: "meteo.travel", href: "https://meteo.travel" },
+];
+
 export default function Footer() {
   return (
     <footer className="border-t bg-white mt-auto" style={{ borderColor: "#DDDDDD" }}>
       <div className="max-w-6xl mx-auto px-6 py-12">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-8 mb-10">
+
           {/* Scopri */}
           <div>
             <h3 className="text-xs font-semibold uppercase tracking-widest text-gray-900 mb-4">
@@ -40,6 +52,7 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-2.5">
               {[
+                { href: "/per-gestori", label: "Per gestori" },
                 { href: "/aggiungi-struttura", label: "Aggiungi struttura" },
                 { href: "/rivendica-scheda", label: "Rivendica la tua scheda" },
                 { href: "/blog", label: "Blog" },
@@ -66,6 +79,10 @@ export default function Footer() {
                 { href: "/login", label: "Accedi" },
                 { href: "/registrati", label: "Registrati" },
                 { href: "/contatti", label: "Contatti" },
+                { href: "/privacy", label: "Privacy Policy" },
+                { href: "/cookie", label: "Cookie Policy" },
+                { href: "/termini", label: "Termini e Condizioni" },
+                { href: "/disclaimer", label: "Disclaimer Schede" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link
@@ -88,18 +105,21 @@ export default function Footer() {
           <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 mb-3">
             Rete viaggi.app
           </p>
-          <div className="flex items-center justify-center gap-5 flex-wrap">
-            {["agriturismi.app", "spiagge.app", "borghi.app", "montagna.app"].map((site) => (
-              <span
-                key={site}
-                className={`text-xs font-medium ${
-                  site === "agriturismi.app"
+          <div className="flex items-center justify-center gap-4 flex-wrap">
+            {RETE.map(({ label, href }) => (
+              <a
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`text-xs font-medium transition-colors ${
+                  label === "agriturismi.app"
                     ? "text-[#2D6A4F] font-semibold"
-                    : "text-gray-400"
+                    : "text-gray-400 hover:text-gray-600"
                 }`}
               >
-                {site}
-              </span>
+                {label}
+              </a>
             ))}
           </div>
         </div>

@@ -121,13 +121,21 @@ export default async function SchedaAgriturismo({ params }: Params) {
           </div>
         ) : (
           <div
-            className="rounded-2xl h-64 sm:h-[420px] flex flex-col items-center justify-center gap-3"
+            className="rounded-2xl h-64 sm:h-[420px] flex flex-col items-center justify-center gap-3 text-center px-6"
             style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #52B788 100%)" }}
           >
-            <span className="text-8xl opacity-20 select-none">🌿</span>
-            <span className="text-white/40 text-sm select-none">
+            <span className="text-7xl opacity-20 select-none">📸</span>
+            <p className="text-white/50 text-sm select-none max-w-xs">
               Foto non ancora disponibile
-            </span>
+            </p>
+            {!a.verificato && (
+              <a
+                href={`/rivendica-scheda?slug=${a.slug}`}
+                className="mt-1 px-4 py-2 rounded-full text-xs font-semibold text-white border border-white/30 hover:bg-white/10 transition-colors"
+              >
+                Sei il titolare? Aggiungi le tue foto →
+              </a>
+            )}
           </div>
         )}
       </div>
@@ -159,24 +167,45 @@ export default async function SchedaAgriturismo({ params }: Params) {
                   </span>
                 )}
               </p>
+              <p className="text-xs text-gray-400 mt-1.5">
+                Ultimo aggiornamento:{" "}
+                {new Date(a.updated_at).toLocaleDateString("it-IT", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </p>
             </div>
 
             {/* Banner non rivendicata */}
             {!a.verificato && (
               <div
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border px-4 py-3"
+                className="rounded-xl border px-5 py-4"
                 style={{ borderColor: "#DDDDDD", backgroundColor: "#F7F7F7" }}
               >
-                <p className="text-xs text-[#717171]">
-                  ⚑ Scheda informativa non rivendicata — i dati provengono da fonti pubbliche.
+                <p className="text-sm text-[#717171] leading-relaxed mb-3">
+                  ℹ️{" "}
+                  <strong className="text-gray-800">Scheda informativa non rivendicata.</strong>{" "}
+                  Le informazioni sono state raccolte da fonti pubblicamente accessibili e potrebbero
+                  non essere aggiornate. Il titolare può richiedere gratuitamente modifica,
+                  rivendicazione o rimozione della scheda.
                 </p>
-                <a
-                  href={`/rivendica-scheda?slug=${a.slug}`}
-                  className="text-xs font-semibold underline underline-offset-2 shrink-0"
-                  style={{ color: "#2D6A4F" }}
-                >
-                  Sei il titolare? Rivendica gratuitamente →
-                </a>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={`/rivendica-scheda?slug=${a.slug}`}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg text-white transition-opacity hover:opacity-90"
+                    style={{ backgroundColor: "#2D6A4F" }}
+                  >
+                    Rivendica questa scheda
+                  </a>
+                  <a
+                    href={`mailto:info@agriturismi.app?subject=Segnalazione%20scheda%20${encodeURIComponent(a.nome)}&body=Scheda%3A%20${encodeURIComponent(`https://agriturismi.app/agriturismo/${a.slug}`)}`}
+                    className="text-xs font-semibold px-3 py-1.5 rounded-lg border text-[#717171] hover:bg-gray-100 transition-colors"
+                    style={{ borderColor: "#DDDDDD" }}
+                  >
+                    Segnala un errore
+                  </a>
+                </div>
               </div>
             )}
 
@@ -261,6 +290,16 @@ export default async function SchedaAgriturismo({ params }: Params) {
               </h2>
               <ShareButtons url={url} titolo={a.nome} />
             </section>
+
+            {/* Segnala errore */}
+            <div className="text-center pt-2">
+              <a
+                href={`mailto:info@agriturismi.app?subject=Segnalazione%20scheda%20${encodeURIComponent(a.nome)}&body=Scheda%3A%20${encodeURIComponent(url)}`}
+                className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                ⚠️ Segnala un errore in questa scheda
+              </a>
+            </div>
           </div>
 
           {/* ── SIDEBAR DESTRA (sticky) ──────────────────────────── */}
@@ -306,23 +345,34 @@ export default async function SchedaAgriturismo({ params }: Params) {
                       </a>
                     )}
                     {a.sito_web && (
-                      <a
-                        href={a.sito_web}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
-                      >
-                        <span
-                          className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
-                          style={{ borderColor: "#DDDDDD" }}
+                      <>
+                        <a
+                          href={a.sito_web}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
                         >
-                          <Globe size={15} />
-                        </span>
-                        <span className="truncate flex-1">
-                          {a.sito_web.replace(/^https?:\/\//, "")}
-                        </span>
-                        <ExternalLink size={12} className="shrink-0 opacity-50" />
-                      </a>
+                          <span
+                            className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
+                            style={{ borderColor: "#DDDDDD" }}
+                          >
+                            <Globe size={15} />
+                          </span>
+                          <span className="truncate flex-1">
+                            {a.sito_web.replace(/^https?:\/\//, "")}
+                          </span>
+                          <ExternalLink size={12} className="shrink-0 opacity-50" />
+                        </a>
+                        <a
+                          href={a.sito_web}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block w-full text-center py-2.5 rounded-xl text-sm font-semibold border-2 transition-colors hover:bg-green-50 mt-1"
+                          style={{ borderColor: "#2D6A4F", color: "#2D6A4F" }}
+                        >
+                          🌐 Visita il sito ufficiale
+                        </a>
+                      </>
                     )}
                   </div>
                 </div>
