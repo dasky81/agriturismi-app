@@ -249,10 +249,10 @@ export default function WidgetMeteo() {
       <div className="grid lg:grid-cols-[300px_1fr]">
 
         {/* ── SINISTRA — Meteo posizione attuale ─────────────────── */}
-        <div className="flex flex-col gap-5 p-7" style={{ backgroundColor: "#0F172A" }}>
+        <div className="flex flex-col gap-5 p-5 sm:p-7" style={{ backgroundColor: "#0F172A" }}>
 
           {/* Branding */}
-          <p className="text-[10px] font-bold uppercase tracking-widest text-white/30">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 whitespace-nowrap">
             🌤️ Meteo · powered by{" "}
             <a
               href="https://meteo.travel"
@@ -316,10 +316,10 @@ export default function WidgetMeteo() {
               </div>
 
               <div className="flex items-end gap-3">
-                <span className="text-7xl font-bold text-white tabular-nums leading-none">
+                <span className="text-6xl sm:text-7xl font-bold text-white tabular-nums leading-none">
                   {meteoLocale.temp}°
                 </span>
-                <span className="text-5xl mb-1.5">{wmo(meteoLocale.code).emoji}</span>
+                <span className="text-4xl sm:text-5xl mb-1.5">{wmo(meteoLocale.code).emoji}</span>
               </div>
 
               <p className="text-white/60 text-sm">{wmo(meteoLocale.code).desc}</p>
@@ -347,25 +347,25 @@ export default function WidgetMeteo() {
         </div>
 
         {/* ── DESTRA — Cerca destinazione + Previsioni ────────────── */}
-        <div className="flex flex-col gap-6 p-7 bg-white">
+        <div className="flex flex-col gap-6 p-5 sm:p-7 bg-white">
 
           {/* Form ricerca */}
           <div>
             <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">
               Cerca destinazione
             </p>
-            <form onSubmit={(e) => void handleCerca(e)} className="flex gap-2">
+            <form onSubmit={(e) => void handleCerca(e)} className="flex flex-col sm:flex-row gap-2">
               <input
                 type="text"
                 value={inputCerca}
                 onChange={(e) => setInputCerca(e.target.value)}
                 placeholder="es. Firenze, Taormina, Alberobello…"
-                className="flex-1 px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition min-w-0"
+                className="w-full flex-1 px-4 py-2.5 text-sm rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#2D6A4F] transition min-w-0"
               />
               <button
                 type="submit"
                 disabled={!inputCerca.trim() || statoCerca === "loading"}
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
+                className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40 shrink-0"
                 style={{ backgroundColor: "#2D6A4F" }}
               >
                 {statoCerca === "loading" ? (
@@ -405,13 +405,14 @@ export default function WidgetMeteo() {
                   </span>
                 )}
               </p>
-              <div className="grid grid-cols-7 gap-1">
+              <div className="overflow-x-auto">
+                <div className="flex gap-2 pb-1">
                 {datiAttivi.previsioni.map((p) => {
                   const { emoji } = wmo(p.code);
                   return (
                     <div
                       key={p.data}
-                      className="flex flex-col items-center gap-1.5 py-3 px-1 rounded-xl hover:bg-gray-50 transition-colors"
+                      className="flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl hover:bg-gray-50 transition-colors shrink-0 w-14 sm:flex-1 sm:w-auto"
                     >
                       <span className="text-[10px] font-bold text-gray-400">
                         {giornoBreveForecast(p.data)}
@@ -422,6 +423,7 @@ export default function WidgetMeteo() {
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           ) : (

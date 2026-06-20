@@ -120,35 +120,43 @@ export default async function SchedaAgriturismo({ params }: Params) {
         <h1 className="sm:hidden text-2xl font-bold text-[#222222] mb-4">{a.nome}</h1>
 
         {hasFoto ? (
-          <div className="grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden h-64 sm:h-[420px]">
-            {/* Foto principale grande */}
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={fotoGallery[0]}
-              alt={a.nome}
-              className="col-span-2 row-span-2 w-full h-full object-cover"
-            />
-            {/* 4 foto piccole (o placeholder) */}
-            {[1, 2, 3, 4].map((i) =>
-              fotoGallery[i] ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  key={i}
-                  src={fotoGallery[i]}
-                  alt={`${a.nome} ${i + 1}`}
-                  className="col-span-1 row-span-1 w-full h-full object-cover"
-                />
-              ) : (
-                <div
-                  key={i}
-                  className="col-span-1 row-span-1 w-full h-full flex items-center justify-center"
-                  style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)" }}
-                >
-                  <span className="text-2xl opacity-20">🌿</span>
-                </div>
-              )
-            )}
-          </div>
+          <>
+            {/* Mobile: solo foto principale */}
+            <div className="sm:hidden rounded-2xl overflow-hidden h-64">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={fotoGallery[0]} alt={a.nome} className="w-full h-full object-cover" />
+            </div>
+            {/* Desktop: griglia 4+1 */}
+            <div className="hidden sm:grid grid-cols-4 grid-rows-2 gap-2 rounded-2xl overflow-hidden h-[420px]">
+              {/* Foto principale grande */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={fotoGallery[0]}
+                alt={a.nome}
+                className="col-span-2 row-span-2 w-full h-full object-cover"
+              />
+              {/* 4 foto piccole (o placeholder) */}
+              {[1, 2, 3, 4].map((i) =>
+                fotoGallery[i] ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    key={i}
+                    src={fotoGallery[i]}
+                    alt={`${a.nome} ${i + 1}`}
+                    className="col-span-1 row-span-1 w-full h-full object-cover"
+                  />
+                ) : (
+                  <div
+                    key={i}
+                    className="col-span-1 row-span-1 w-full h-full flex items-center justify-center"
+                    style={{ background: "linear-gradient(135deg, #1B4332 0%, #2D6A4F 100%)" }}
+                  >
+                    <span className="text-2xl opacity-20">🌿</span>
+                  </div>
+                )
+              )}
+            </div>
+          </>
         ) : (
           <div
             className="rounded-2xl h-64 sm:h-[420px] flex flex-col items-center justify-center gap-3 text-center px-6"
@@ -345,11 +353,11 @@ export default async function SchedaAgriturismo({ params }: Params) {
                   <h2 className="font-semibold text-[#222222] mb-4">
                     Contatta la struttura
                   </h2>
-                  <div className="flex flex-col gap-3">
+                  <div className="flex flex-col gap-2">
                     {a.telefono && (
                       <a
                         href={`tel:${a.telefono}`}
-                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group w-full py-2.5 px-3 rounded-xl hover:bg-gray-50 -mx-3"
                       >
                         <span
                           className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
@@ -363,7 +371,7 @@ export default async function SchedaAgriturismo({ params }: Params) {
                     {a.email && (
                       <a
                         href={`mailto:${a.email}`}
-                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                        className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group w-full py-2.5 px-3 rounded-xl hover:bg-gray-50 -mx-3"
                       >
                         <span
                           className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"
@@ -380,7 +388,7 @@ export default async function SchedaAgriturismo({ params }: Params) {
                           href={a.sito_web}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group"
+                          className="flex items-center gap-3 text-sm text-[#222222] hover:text-[#2D6A4F] transition-colors group w-full py-2.5 px-3 rounded-xl hover:bg-gray-50 -mx-3"
                         >
                           <span
                             className="w-9 h-9 rounded-full border flex items-center justify-center shrink-0 group-hover:border-[#2D6A4F] transition-colors"

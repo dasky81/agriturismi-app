@@ -187,6 +187,7 @@ function HomeInterna() {
       {/* ── CATEGORIA TABS ──────────────────────────────────────── */}
       <div className="border-b sticky top-20 z-40 bg-white" style={{ borderColor: "#DDDDDD" }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="relative">
           <div className="flex items-center gap-1 overflow-x-auto py-2 snap-x snap-mandatory scrollbar-hide">
             {CATEGORIE.map((cat, i) => {
               const attivo = categoriaAttiva.id === cat.id && !mostraAI && !mostraVicino;
@@ -206,6 +207,8 @@ function HomeInterna() {
                 </button>
               );
             })}
+          </div>
+          <div className="pointer-events-none absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-white to-transparent" />
           </div>
         </div>
       </div>
