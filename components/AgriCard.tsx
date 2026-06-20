@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -43,17 +43,77 @@ const REGIONE_EMOJI: Record<string, string> = {
   "Emilia-Romagna": "🧀",
 };
 
+// ── Cache a livello di modulo: evita N richieste identiche per N card ───────
+interface FavoritiCache {
+  ids: string[];
+  loggedIn: boolean;
+}
+
+let _cachePromise: Promise<FavoritiCache> | null = null;
+
+function caricaFavoriti(): Promise<FavoritiCache> {
+  if (_cachePromise) return _cachePromise;
+  _cachePromise = fetch("/api/preferiti")
+    .then((r) => r.json() as Promise<FavoritiCache>)
+    .catch(() => ({ ids: [], loggedIn: false }));
+  return _cachePromise;
+}
+
+function invalidaCache() {
+  _cachePromise = null;
+}
+
+// ── Props ─────────────────────────────────────────────────────────────────────
 interface Props {
   agriturismo: Agriturismo;
   distanza_km?: number;
 }
 
 export default function AgriCard({ agriturismo: a, distanza_km }: Props) {
-  const [salvato, setSalvato] = useState(false);
+  const [salvato, setSalvato] = useState<boolean | null>(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [caricando, setCaricando] = useState(false);
   const router = useRouter();
 
   const primiServizi = a.servizi.slice(0, 3);
   const regioneEmoji = a.regione ? (REGIONE_EMOJI[a.regione] ?? "🌿") : "🌿";
+
+  // Carica stato preferito al mount (cache condivisa tra tutte le card)
+  useEffect(() => {
+    caricaFavoriti().then(({ ids, loggedIn: logged }) => {
+      setLoggedIn(logged);
+      setSalvato(ids.includes(a.id));
+    });
+  }, [a.id]);
+
+  async function handleCuore(e: React.MouseEvent) {
+    e.stopPropagation();
+
+    if (!loggedIn) {
+      router.push(`/login?redirect=/agriturismo/${a.slug}`);
+      return;
+    }
+
+    if (caricando || salvato === null) return;
+
+    const nuovoStato = !salvato;
+    setSalvato(nuovoStato); // optimistic
+    setCaricando(true);
+    invalidaCache();
+
+    const risposta = await fetch("/api/preferiti", {
+      method: nuovoStato ? "POST" : "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agriturismo_id: a.id }),
+    });
+
+    setCaricando(false);
+
+    if (!risposta.ok) {
+      setSalvato(!nuovoStato); // undo on error
+      invalidaCache();
+    }
+  }
 
   return (
     <article className="flex flex-col gap-1.5">
@@ -89,19 +149,17 @@ export default function AgriCard({ agriturismo: a, distanza_km }: Props) {
 
           {/* Cuore salva */}
           <button
-            onClick={(e) => {
-              e.stopPropagation();
-              setSalvato(!salvato);
-            }}
-            className="absolute top-3 right-3 z-10 p-1.5 rounded-full hover:scale-110 transition-transform"
-            aria-label={salvato ? "Rimuovi dai salvati" : "Salva"}
+            onClick={(e) => void handleCuore(e)}
+            disabled={caricando}
+            className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-black/20 backdrop-blur-sm hover:scale-110 transition-transform disabled:opacity-60"
+            aria-label={salvato ? "Rimuovi dai preferiti" : "Salva nei preferiti"}
           >
             <Heart
-              size={20}
+              size={18}
               className={
                 salvato
-                  ? "text-[#E8956D] fill-[#E8956D]"
-                  : "text-white drop-shadow-sm"
+                  ? "text-rose-500 fill-rose-500"
+                  : "text-white"
               }
               strokeWidth={salvato ? 2 : 2.5}
             />
