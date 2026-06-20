@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Sardegna — Natura selvaggia e tradizioni | agriturismi.app",
   description:
     "Agriturismi in Sardegna tra Barbagia, Gallura e Costa Smeralda. Pecorino sardo, mirto, pane carasau e spiagge da sogno.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-sardegna" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-sardegna" },
 };
 
 const config: ConfigPaginaSEO = {

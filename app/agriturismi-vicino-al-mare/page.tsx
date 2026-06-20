@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi Vicino al Mare — Campagna e spiagge | agriturismi.app",
   description:
     "Agriturismi italiani vicino al mare: il meglio di due mondi, campagna autentica e spiagge a pochi km. Puglia, Sicilia, Sardegna, Toscana e Campania.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-vicino-al-mare" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-vicino-al-mare" },
 };
 
 const config: ConfigPaginaSEO = {

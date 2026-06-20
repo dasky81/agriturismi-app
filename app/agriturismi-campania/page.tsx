@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Campania — Vesuvio, Amalfi e Cilento | agriturismi.app",
   description:
     "Agriturismi in Campania tra costa Amalfitana, Cilento, Irpinia e Vesuvio. Mozzarella di bufala, limoni di Sorrento e ospitalità partenopea.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-campania" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-campania" },
 };
 
 const config: ConfigPaginaSEO = {

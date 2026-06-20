@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Umbria — Il cuore verde d'Italia | agriturismi.app",
   description:
     "Agriturismi in Umbria tra uliveti, tartufi e borghi medievali. Scopri le migliori strutture umbre con piscina, ristorante e prodotti tipici.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-umbria" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-umbria" },
 };
 
 const config: ConfigPaginaSEO = {

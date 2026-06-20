@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi con Ristorante — Cucina tipica a km zero | agriturismi.app",
   description:
     "Agriturismi italiani con ristorante e cucina tipica: prodotti dell'azienda, ricette tradizionali e sapori autentici. Prenota la tua tavola in campagna.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-con-ristorante" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-con-ristorante" },
 };
 
 const config: ConfigPaginaSEO = {

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi Biologici — Cibo naturale e sostenibilità | agriturismi.app",
   description:
     "Agriturismi italiani biologici certificati: prodotti bio, cucina naturale, sostenibilità ambientale e rispetto per la terra. Scegli il verde che fa bene.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-biologici" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-biologici" },
 };
 
 const config: ConfigPaginaSEO = {

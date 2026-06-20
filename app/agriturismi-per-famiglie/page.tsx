@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi per Famiglie con Bambini — Fattorie e natura | agriturismi.app",
   description:
     "I migliori agriturismi italiani per famiglie con bambini: fattorie didattiche, animali, orti e spazi giochi. Vacanze in campagna sicure e divertenti.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-per-famiglie" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-per-famiglie" },
 };
 
 const config: ConfigPaginaSEO = {

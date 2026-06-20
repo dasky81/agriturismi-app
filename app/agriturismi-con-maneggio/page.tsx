@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi con Maneggio — Equitazione in campagna | agriturismi.app",
   description:
     "Agriturismi italiani con maneggio e cavalli: lezioni di equitazione, passeggiate a cavallo e trekking equestre. Per principianti e cavalieri esperti.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-con-maneggio" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-con-maneggio" },
 };
 
 const config: ConfigPaginaSEO = {

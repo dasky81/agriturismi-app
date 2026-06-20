@@ -40,7 +40,7 @@ export default async function PaginaSEO({ config }: Props) {
     "@type": "CollectionPage",
     name: config.titolo,
     description: config.testoIntro,
-    url: `https://agriturismi.app${config.tipo === "regione" ? `/agriturismi-${config.valore.toLowerCase()}` : `/agriturismi-${config.valore.toLowerCase().replace(/\s+/g, "-")}`}`,
+    url: `https://www.agriturismi.app${config.tipo === "regione" ? `/agriturismi-${config.valore.toLowerCase()}` : `/agriturismi-${config.valore.toLowerCase().replace(/\s+/g, "-")}`}`,
     numberOfItems: agriturismi.length,
   };
 

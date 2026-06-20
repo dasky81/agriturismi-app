@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Sicilia — Mare, sole e tradizioni | agriturismi.app",
   description:
     "Agriturismi in Sicilia tra limoni, ulivi, vigneti e mare cristallino. Trova la struttura perfetta nella terra del sole con la nostra ricerca AI.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-sicilia" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-sicilia" },
 };
 
 const config: ConfigPaginaSEO = {

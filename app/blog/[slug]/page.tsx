@@ -27,7 +27,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const post = await getPost(slug);
   if (!post) return { title: "Post non trovato" };
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://agriturismi.app";
+  const baseUrl = "https://www.agriturismi.app";
   const url = `${baseUrl}/blog/${post.slug}`;
 
   return {
@@ -51,6 +51,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
         ? [(post.og_image ?? post.cover_url)!]
         : [],
     },
+    alternates: { canonical: url },
   };
 }
 
@@ -67,15 +68,37 @@ export default async function BlogPostPage({ params }: Params) {
   const post = await getPost(slug);
   if (!post) notFound();
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://agriturismi.app";
+  const baseUrl = "https://www.agriturismi.app";
   const url = `${baseUrl}/blog/${post.slug}`;
 
   const nomeAutore = post.autore?.nome
     ? `${post.autore.nome} ${post.autore.cognome ?? ""}`.trim()
     : "Redazione";
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.titolo,
+    description: post.excerpt ?? undefined,
+    url,
+    datePublished: post.created_at,
+    dateModified: post.updated_at,
+    author: { "@type": "Person", name: nomeAutore },
+    publisher: {
+      "@type": "Organization",
+      name: "agriturismi.app",
+      url: "https://www.agriturismi.app",
+    },
+    ...(post.cover_url ? { image: post.cover_url } : {}),
+    inLanguage: "it",
+  };
+
   return (
     <main className="max-w-2xl mx-auto px-4 py-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Breadcrumb */}
       <nav className="text-xs text-gray-400 mb-6 flex items-center gap-1">
         <Link href="/" className="hover:text-gray-600">

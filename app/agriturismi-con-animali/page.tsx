@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi che Accettano Animali — Pet-friendly in Italia | agriturismi.app",
   description:
     "Agriturismi italiani pet-friendly: porta il tuo cane o gatto in campagna. Strutture che accettano animali domestici con spazi verdi e libertà.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-con-animali" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-con-animali" },
 };
 
 const config: ConfigPaginaSEO = {

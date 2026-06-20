@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next";
 import { creaClientServer } from "@/lib/supabase-server";
 
-const BASE_URL = "https://agriturismi.app";
+const BASE_URL = "https://www.agriturismi.app";
 
 const PAGINE_STATICHE: Array<{
   url: string;
@@ -10,9 +10,8 @@ const PAGINE_STATICHE: Array<{
 }> = [
   { url: "/",                    priority: 1.0, changeFrequency: "daily" },
   { url: "/blog",                priority: 0.6, changeFrequency: "daily" },
-  { url: "/login",               priority: 0.3, changeFrequency: "monthly" },
-  { url: "/registrati",          priority: 0.3, changeFrequency: "monthly" },
   { url: "/aggiungi-struttura",  priority: 0.5, changeFrequency: "monthly" },
+  { url: "/per-gestori",         priority: 0.5, changeFrequency: "monthly" },
 ];
 
 const PAGINE_SEO: Array<{

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi nel Lazio — Campagna romana e borghi | agriturismi.app",
   description:
     "Agriturismi nel Lazio a pochi km da Roma: Castelli Romani, Ciociaria, Maremma laziale e lago di Bolsena. Trova la tua oasi di pace con l'AI.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-lazio" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-lazio" },
 };
 
 const config: ConfigPaginaSEO = {

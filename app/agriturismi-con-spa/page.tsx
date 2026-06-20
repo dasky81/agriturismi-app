@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi con Spa e Benessere — Relax in campagna | agriturismi.app",
   description:
     "Agriturismi italiani con spa, sauna, idromassaggio e trattamenti benessere. Relax nella natura tra massaggi, bagni aromatici e prodotti naturali.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-con-spa" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-con-spa" },
 };
 
 const config: ConfigPaginaSEO = {

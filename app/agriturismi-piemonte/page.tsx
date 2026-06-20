@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Piemonte — Langhe, Monferrato e tartufo | agriturismi.app",
   description:
     "Agriturismi in Piemonte tra Langhe, Monferrato e Barolo. Degustazioni di Barolo e Barbaresco, tartufo d'Alba e ospitalità piemontese autentica.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-piemonte" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-piemonte" },
 };
 
 const config: ConfigPaginaSEO = {

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Puglia — Trulli, ulivi e mare | agriturismi.app",
   description:
     "Agriturismi in Puglia tra trulli, muretti a secco, ulivi centenari e Adriatico cristallino. Scopri le migliori strutture pugliesi con l'AI.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-puglia" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-puglia" },
 };
 
 const config: ConfigPaginaSEO = {

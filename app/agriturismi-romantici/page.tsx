@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi Romantici per Coppie — Fughe d'amore in Italia | agriturismi.app",
   description:
     "I più romantici agriturismi italiani per coppie: suite con vasca idromassaggio, cene a lume di candela, piscine tra i vigneti e tramonti indimenticabili.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-romantici" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-romantici" },
 };
 
 const config: ConfigPaginaSEO = {

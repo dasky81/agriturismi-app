@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Trentino — Dolomiti, mele e vini alpini | agriturismi.app",
   description:
     "Agriturismi in Trentino tra le Dolomiti UNESCO, mele della Val di Non, Müller Thurgau e ospitalità masi tipici. Natura e gusto nelle Alpi italiane.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-trentino" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-trentino" },
 };
 
 const config: ConfigPaginaSEO = {

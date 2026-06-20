@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi con Piscina — Relax tra natura e campagna | agriturismi.app",
   description:
     "I migliori agriturismi italiani con piscina: immersi tra vigneti, uliveti e colline. Prenota il tuo soggiorno con piscina privata o panoramica.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-con-piscina" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-con-piscina" },
 };
 
 const config: ConfigPaginaSEO = {

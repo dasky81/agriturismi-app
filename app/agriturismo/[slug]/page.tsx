@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const a = await getAgriturismo(slug);
   if (!a) return { title: "Agriturismo non trovato — agriturismi.app" };
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agriturismi.app";
+  const appUrl = "https://www.agriturismi.app";
   const url = `${appUrl}/agriturismo/${slug}`;
   const desc =
     a.descrizione?.slice(0, 160) ??
@@ -71,9 +71,32 @@ export default async function SchedaAgriturismo({ params }: Params) {
   const a = await getAgriturismo(slug);
   if (!a) notFound();
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://agriturismi.app";
+  const appUrl = "https://www.agriturismi.app";
   const url = `${appUrl}/agriturismo/${slug}`;
   const luogo = [a.comune, a.provincia, a.regione].filter(Boolean).join(" · ");
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    name: a.nome,
+    url,
+    ...(a.descrizione ? { description: a.descrizione.slice(0, 200) } : {}),
+    ...(a.telefono ? { telephone: a.telefono } : {}),
+    ...(a.email ? { email: a.email } : {}),
+    ...(a.sito_web ? { sameAs: a.sito_web } : {}),
+    ...(a.foto_principale ? { image: a.foto_principale } : {}),
+    address: {
+      "@type": "PostalAddress",
+      ...(a.indirizzo ? { streetAddress: a.indirizzo } : {}),
+      ...(a.comune ? { addressLocality: a.comune } : {}),
+      ...(a.provincia ? { addressRegion: a.provincia } : {}),
+      addressCountry: "IT",
+    },
+    ...(a.lat != null && a.lng != null
+      ? { geo: { "@type": "GeoCoordinates", latitude: a.lat, longitude: a.lng } }
+      : {}),
+    ...(a.verificato ? { hasVerificationStatus: "Verified" } : {}),
+  };
 
   // Gallery: fino a 5 foto (principale + 4 dalla gallery)
   const fotoGallery = [
@@ -84,6 +107,10 @@ export default async function SchedaAgriturismo({ params }: Params) {
 
   return (
     <div className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
 
       {/* ── GALLERY ──────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">
@@ -150,9 +177,9 @@ export default async function SchedaAgriturismo({ params }: Params) {
 
             {/* Titolo (desktop) */}
             <div>
-              <h1 className="hidden sm:block text-3xl font-bold text-[#222222] mb-2">
+              <p className="hidden sm:block text-3xl font-bold text-[#222222] mb-2">
                 {a.nome}
-              </h1>
+              </p>
               <p className="flex flex-wrap items-center gap-2 text-sm text-[#717171]">
                 {a.regione && <span>{a.regione}</span>}
                 {a.comune && <><span>·</span><span>{a.comune}</span></>}

@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Toscana — Le migliori strutture | agriturismi.app",
   description:
     "Scopri i migliori agriturismi in Toscana: colline, vigneti, olio d'oliva e ospitalità autentica. Cerca con l'AI la struttura perfetta per la tua vacanza.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-toscana" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-toscana" },
 };
 
 const config: ConfigPaginaSEO = {

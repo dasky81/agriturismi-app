@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi con Degustazione Vino — Cantine e wine tour | agriturismi.app",
   description:
     "Agriturismi italiani con degustazione vino in cantina: Barolo, Brunello, Amarone, Primitivo e Nero d'Avola. Enoturismo autentico direttamente dal produttore.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-degustazione-vino" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-degustazione-vino" },
 };
 
 const config: ConfigPaginaSEO = {

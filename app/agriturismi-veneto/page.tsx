@@ -1,4 +1,4 @@
-import { Metadata } from "next";
+﻿import { Metadata } from "next";
 import PaginaSEO from "@/components/PaginaSEO";
 import type { ConfigPaginaSEO } from "@/components/PaginaSEO";
 
@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "Agriturismi in Veneto — Prosecco, Dolomiti e laghi | agriturismi.app",
   description:
     "Agriturismi in Veneto tra le colline del Prosecco, le Dolomiti, il lago di Garda e la laguna veneziana. Ospitalità autentica nella terra del buon vivere.",
-  alternates: { canonical: "https://agriturismi.app/agriturismi-veneto" },
+  alternates: { canonical: "https://www.agriturismi.app/agriturismi-veneto" },
 };
 
 const config: ConfigPaginaSEO = {
