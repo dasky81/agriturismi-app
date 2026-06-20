@@ -27,9 +27,35 @@ export default async function DashboardLayout({
     profilo?.nome ?? user.email?.split("@")[0] ?? "Utente";
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <aside className="w-56 bg-white border-r border-gray-200 flex flex-col py-6 px-4 gap-1 shrink-0">
+    <div className="min-h-screen bg-gray-50 flex flex-col lg:flex-row">
+
+      {/* ── TOP BAR MOBILE (solo < lg) ─────────────────────────────── */}
+      <div className="lg:hidden bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[10px] text-gray-400 font-medium uppercase tracking-wider leading-none mb-0.5">
+            Area riservata
+          </p>
+          <p className="text-sm font-semibold text-gray-800 truncate">
+            {nomeUtente}
+          </p>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {profilo?.ruolo && (
+            <span className="text-[10px] bg-green-100 text-green-700 px-2 py-0.5 rounded font-medium capitalize">
+              {profilo.ruolo}
+            </span>
+          )}
+          <Link
+            href="/"
+            className="text-xs text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            ← Sito
+          </Link>
+        </div>
+      </div>
+
+      {/* ── SIDEBAR DESKTOP (solo ≥ lg) ────────────────────────────── */}
+      <aside className="hidden lg:flex w-56 bg-white border-r border-gray-200 flex-col py-6 px-4 gap-1 shrink-0">
         <div className="mb-4 px-2">
           <p className="text-xs text-gray-400 font-medium uppercase tracking-wider">
             Area riservata
@@ -82,8 +108,8 @@ export default async function DashboardLayout({
         </div>
       </aside>
 
-      {/* Contenuto principale */}
-      <main className="flex-1 min-w-0 p-8">{children}</main>
+      {/* ── CONTENUTO PRINCIPALE ───────────────────────────────────── */}
+      <main className="flex-1 min-w-0 px-4 py-6 lg:p-8">{children}</main>
     </div>
   );
 }

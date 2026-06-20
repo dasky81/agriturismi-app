@@ -144,18 +144,18 @@ export default function DashboardPage() {
     [profilo?.nome, profilo?.cognome].filter(Boolean).join(" ") || "Utente";
 
   return (
-    <div className="flex flex-col gap-6 max-w-2xl">
+    <div className="flex flex-col gap-4 lg:gap-6 w-full max-w-2xl">
 
       {/* Header avatar */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3 lg:gap-4">
         <div
-          className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold text-white shrink-0"
+          className="w-12 h-12 lg:w-14 lg:h-14 rounded-full flex items-center justify-center text-base lg:text-xl font-bold text-white shrink-0"
           style={{ background: "linear-gradient(135deg, #1B4332, #2D6A4F)" }}
         >
           {iniziali}
         </div>
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Ciao {nomeCompleto}! 👋</h1>
+        <div className="min-w-0">
+          <h1 className="text-xl lg:text-2xl font-bold text-gray-900 truncate">Ciao {nomeCompleto}! 👋</h1>
           <p className="text-sm text-gray-400">Benvenuto nella tua area personale</p>
         </div>
       </div>
