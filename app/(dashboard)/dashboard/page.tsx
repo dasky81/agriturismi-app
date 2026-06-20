@@ -249,28 +249,40 @@ export default function DashboardPage() {
             La mia struttura
           </h2>
           {struttura ? (
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-medium text-gray-900">{struttura.nome}</p>
-                <span
-                  className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                    struttura.verificato
-                      ? "bg-green-100 text-green-700"
-                      : "bg-yellow-100 text-yellow-700"
-                  }`}
+            <>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-gray-900">{struttura.nome}</p>
+                  <span
+                    className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                      struttura.verificato
+                        ? "bg-green-100 text-green-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {struttura.verificato ? "✓ Verificata" : "⏳ In attesa di verifica"}
+                  </span>
+                </div>
+                <Link
+                  href={`/agriturismo/${struttura.slug}`}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                  style={{ backgroundColor: "#2D6A4F" }}
                 >
-                  {struttura.verificato ? "✓ Verificata" : "⏳ In attesa di verifica"}
-                </span>
+                  Vedi scheda
+                  <ChevronRight size={14} />
+                </Link>
               </div>
-              <Link
-                href={`/agriturismo/${struttura.slug}`}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                style={{ backgroundColor: "#2D6A4F" }}
-              >
-                Vedi scheda
-                <ChevronRight size={14} />
-              </Link>
-            </div>
+              {profilo?.ruolo === "proprietario" && (
+                <div className="mt-3 pt-3 border-t border-gray-50">
+                  <Link
+                    href="/dashboard/analytics"
+                    className="flex items-center gap-2 text-sm font-medium text-[#2D6A4F] hover:underline"
+                  >
+                    📊 Le mie statistiche →
+                  </Link>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-center py-4">
               <p className="text-sm text-gray-500 mb-3">Nessuna struttura collegata al tuo account</p>

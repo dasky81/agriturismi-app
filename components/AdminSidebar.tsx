@@ -9,6 +9,7 @@ import {
   Mail,
   Newspaper,
   Users,
+  BarChart2,
 } from "lucide-react";
 
 const NAV = [
@@ -18,6 +19,7 @@ const NAV = [
   { href: "/admin/contatti",       label: "Contatti",       icon: Mail },
   { href: "/admin/blog",           label: "Blog",           icon: Newspaper },
   { href: "/admin/utenti",         label: "Utenti",         icon: Users },
+  { href: "/admin/analytics",      label: "Analytics",      icon: BarChart2 },
 ];
 
 export default function AdminSidebar() {

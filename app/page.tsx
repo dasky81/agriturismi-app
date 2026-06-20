@@ -8,6 +8,7 @@ import HeroSlideshow from "@/components/HeroSlideshow";
 import SezioneMeteo from "@/components/SezioneMeteo";
 import { creaClientBrowser } from "@/lib/supabase";
 import { useInView } from "@/hooks/useInView";
+import { useTracking } from "@/hooks/useTracking";
 import type { Agriturismo } from "@/types";
 
 // ── Categorie tab ──────────────────────────────────────────────
@@ -42,6 +43,7 @@ const CATEGORIE: Categoria[] = [
 function HomeInterna() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  useTracking();
   const queryIniziale = searchParams.get("q") ?? "";
   const vicinoPar = searchParams.get("vicino") ?? "";
 

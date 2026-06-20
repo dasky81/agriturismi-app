@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { creaClientServer } from "@/lib/supabase-server";
 import ShareButtons from "@/components/ShareButtons";
+import TrackingClient from "@/components/TrackingClient";
 import { PostConAutore } from "@/types";
 
 const getPost = cache(async (slug: string): Promise<PostConAutore | null> => {
@@ -99,6 +100,7 @@ export default async function BlogPostPage({ params }: Params) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <TrackingClient />
       {/* Breadcrumb */}
       <nav className="text-xs text-gray-400 mb-6 flex items-center gap-1">
         <Link href="/" className="hover:text-gray-600">

@@ -1,4 +1,14 @@
+import { createClient } from "@supabase/supabase-js";
+import Link from "next/link";
 import { creaClientServer } from "@/lib/supabase-server";
+
+function serviceRole() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { persistSession: false } }
+  );
+}
 
 function KpiCard({
   label,
@@ -24,6 +34,12 @@ function KpiCard({
 
 export default async function AdminPanoramica() {
   const supabase = await creaClientServer();
+  const sb = serviceRole();
+
+  const oggi = new Date();
+  oggi.setHours(0, 0, 0, 0);
+  const fa7 = new Date(oggi);
+  fa7.setDate(fa7.getDate() - 7);
 
   const [
     { count: totaleStrutture },
@@ -32,6 +48,8 @@ export default async function AdminPanoramica() {
     { count: totaleUtenti },
     { count: pendingRiv },
     { count: articoliPubblicati },
+    { count: visiteOggi },
+    { count: visite7gg },
   ] = await Promise.all([
     supabase.from("agriturismi").select("*", { count: "exact", head: true }),
     supabase.from("agriturismi").select("*", { count: "exact", head: true }).eq("verificato", true),
@@ -39,6 +57,8 @@ export default async function AdminPanoramica() {
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("rivendicazioni").select("*", { count: "exact", head: true }).eq("stato", "pending"),
     supabase.from("post").select("*", { count: "exact", head: true }).eq("pubblicato", true),
+    sb.from("visite").select("*", { count: "exact", head: true }).gte("created_at", oggi.toISOString()),
+    sb.from("visite").select("*", { count: "exact", head: true }).gte("created_at", fa7.toISOString()),
   ]);
 
   const [{ data: ultimeRiv }, { data: ultimiUtenti }] = await Promise.all([
@@ -62,7 +82,7 @@ export default async function AdminPanoramica() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard label="Totale strutture"      value={totaleStrutture ?? 0}    emoji="🏡" />
         <KpiCard label="Strutture verificate"  value={strutturVerificate ?? 0} emoji="✅" />
         <KpiCard label="Strutture attive"      value={struttureAttive ?? 0}    emoji="🟢" />
@@ -74,6 +94,16 @@ export default async function AdminPanoramica() {
           colore={(pendingRiv ?? 0) > 0 ? "#F59E0B" : "#2D6A4F"}
         />
         <KpiCard label="Articoli pubblicati"   value={articoliPubblicati ?? 0} emoji="📰" />
+        <KpiCard label="Visite oggi"           value={visiteOggi ?? 0}         emoji="📊" />
+        <KpiCard label="Visite 7 giorni"       value={visite7gg ?? 0}          emoji="📈" />
+      </div>
+      <div className="flex justify-end">
+        <Link
+          href="/admin/analytics"
+          className="text-sm font-medium text-[#2D6A4F] hover:underline"
+        >
+          Vedi analytics completi →
+        </Link>
       </div>
 
       {/* ── Ultime rivendicazioni ── */}

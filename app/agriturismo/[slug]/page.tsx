@@ -10,6 +10,7 @@ import {
 import { creaClientServer } from "@/lib/supabase-server";
 import ShareButtons from "@/components/ShareButtons";
 import MappaWrapper from "@/components/MappaWrapper";
+import TrackingClient from "@/components/TrackingClient";
 import type { Agriturismo } from "@/types";
 
 const SERVIZI_ICONE: Record<string, React.ReactNode> = {
@@ -111,6 +112,7 @@ export default async function SchedaAgriturismo({ params }: Params) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <TrackingClient agriturismo_id={a.id} />
 
       {/* ── GALLERY ──────────────────────────────────────────────── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6">

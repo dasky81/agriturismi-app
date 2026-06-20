@@ -2,6 +2,7 @@ import Link from "next/link";
 import { creaClientServer } from "@/lib/supabase-server";
 import AgriCard from "./AgriCard";
 import SezioneMeteo from "./SezioneMeteo";
+import TrackingClient from "./TrackingClient";
 import type { Agriturismo } from "@/types";
 
 export interface ConfigPaginaSEO {
@@ -51,6 +52,7 @@ export default async function PaginaSEO({ config }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <TrackingClient />
 
       {/* ── HERO ─────────────────────────────────────────────────── */}
       <section
