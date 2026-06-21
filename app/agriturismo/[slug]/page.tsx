@@ -2,6 +2,8 @@ import { cache } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import SezioneMeteo from "@/components/SezioneMeteo";
+import NelleVicinanze from "@/components/NelleVicinanze";
+import SezioneRecensioni from "@/components/SezioneRecensioni";
 import {
   MapPin, Phone, Mail, Globe, ExternalLink,
   Waves, UtensilsCrossed, Wifi, Car, PawPrint,
@@ -442,6 +444,12 @@ export default async function SchedaAgriturismo({ params }: Params) {
           </aside>
         </div>
       </div>
+
+      {a.lat !== null && a.lng !== null && (
+        <NelleVicinanze lat={a.lat} lng={a.lng} />
+      )}
+
+      <SezioneRecensioni agriturismo_id={a.id} />
 
       <SezioneMeteo />
 

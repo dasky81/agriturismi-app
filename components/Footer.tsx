@@ -32,6 +32,7 @@ export default function Footer() {
                 { href: "/agriturismi-con-piscina", label: "Con piscina" },
                 { href: "/agriturismi-per-famiglie", label: "Per famiglie" },
                 { href: "/agriturismi-romantici", label: "Romantici" },
+                { href: "/itinerario", label: "Crea itinerario AI" },
               ].map(({ href, label }) => (
                 <li key={href}>
                   <Link

@@ -6,6 +6,7 @@ import { Search, Loader2, Sparkles, MapPin } from "lucide-react";
 import AgriCard from "@/components/AgriCard";
 import HeroSlideshow from "@/components/HeroSlideshow";
 import SezioneMeteo from "@/components/SezioneMeteo";
+import WidgetWeekend from "@/components/WidgetWeekend";
 import { creaClientBrowser } from "@/lib/supabase";
 import { useInView } from "@/hooks/useInView";
 import { useTracking } from "@/hooks/useTracking";
@@ -269,6 +270,14 @@ function HomeInterna() {
           <p className="mt-2 text-xs text-gray-400 text-center">
             Descrivi la tua vacanza ideale — l&apos;AI trova le strutture più adatte.
           </p>
+          <div className="mt-3 text-center">
+            <a
+              href="/itinerario"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#2D6A4F] hover:underline"
+            >
+              🗺️ Crea il tuo itinerario con l&apos;AI →
+            </a>
+          </div>
         </div>
       </div>
 
@@ -329,6 +338,7 @@ function HomeInterna() {
       </main>
 
       <SezioneMeteo />
+      <WidgetWeekend />
 
     </div>
   );

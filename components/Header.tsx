@@ -59,6 +59,15 @@ export default async function Header() {
           <HeaderSearch />
         </div>
 
+        {/* ── ITINERARIO AI ────────────────────────────────── */}
+        <Link
+          href="/itinerario"
+          className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium text-gray-700 border border-gray-200 hover:shadow-md transition-shadow shrink-0 whitespace-nowrap"
+          style={{ borderColor: "#DDDDDD" }}
+        >
+          🗺️ Itinerario
+        </Link>
+
         {/* ── AUTH DESTRA ──────────────────────────────────── */}
         <HeaderAuth utente={user ? { nome, ruolo } : null} />
       </div>

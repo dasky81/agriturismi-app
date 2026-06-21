@@ -10,6 +10,7 @@ import {
   Newspaper,
   Users,
   BarChart2,
+  Star,
 } from "lucide-react";
 
 const NAV = [
@@ -20,6 +21,7 @@ const NAV = [
   { href: "/admin/blog",           label: "Blog",           icon: Newspaper },
   { href: "/admin/utenti",         label: "Utenti",         icon: Users },
   { href: "/admin/analytics",      label: "Analytics",      icon: BarChart2 },
+  { href: "/admin/recensioni",     label: "Recensioni",     icon: Star },
 ];
 
 export default function AdminSidebar() {

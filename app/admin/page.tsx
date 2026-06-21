@@ -50,6 +50,7 @@ export default async function AdminPanoramica() {
     { count: articoliPubblicati },
     { count: visiteOggi },
     { count: visite7gg },
+    { count: recensioniPending },
   ] = await Promise.all([
     supabase.from("agriturismi").select("*", { count: "exact", head: true }),
     supabase.from("agriturismi").select("*", { count: "exact", head: true }).eq("verificato", true),
@@ -59,6 +60,7 @@ export default async function AdminPanoramica() {
     supabase.from("post").select("*", { count: "exact", head: true }).eq("pubblicato", true),
     sb.from("visite").select("*", { count: "exact", head: true }).gte("created_at", oggi.toISOString()),
     sb.from("visite").select("*", { count: "exact", head: true }).gte("created_at", fa7.toISOString()),
+    sb.from("recensioni").select("*", { count: "exact", head: true }).eq("moderata", false),
   ]);
 
   const [{ data: ultimeRiv }, { data: ultimiUtenti }] = await Promise.all([
@@ -82,7 +84,7 @@ export default async function AdminPanoramica() {
       </div>
 
       {/* ── KPI Cards ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
         <KpiCard label="Totale strutture"      value={totaleStrutture ?? 0}    emoji="🏡" />
         <KpiCard label="Strutture verificate"  value={strutturVerificate ?? 0} emoji="✅" />
         <KpiCard label="Strutture attive"      value={struttureAttive ?? 0}    emoji="🟢" />
@@ -96,7 +98,20 @@ export default async function AdminPanoramica() {
         <KpiCard label="Articoli pubblicati"   value={articoliPubblicati ?? 0} emoji="📰" />
         <KpiCard label="Visite oggi"           value={visiteOggi ?? 0}         emoji="📊" />
         <KpiCard label="Visite 7 giorni"       value={visite7gg ?? 0}          emoji="📈" />
+        <KpiCard
+          label="Recensioni in attesa"
+          value={recensioniPending ?? 0}
+          emoji="⭐"
+          colore={(recensioniPending ?? 0) > 0 ? "#F59E0B" : "#2D6A4F"}
+        />
       </div>
+      {(recensioniPending ?? 0) > 0 && (
+        <div className="flex justify-end -mt-4">
+          <Link href="/admin/recensioni" className="text-sm font-medium text-amber-600 hover:underline">
+            Modera recensioni →
+          </Link>
+        </div>
+      )}
       <div className="flex justify-end">
         <Link
           href="/admin/analytics"
