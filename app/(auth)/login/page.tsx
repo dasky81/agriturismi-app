@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { accedi, accediConGoogle } from "@/lib/auth";
+import { creaClientBrowser } from "@/lib/supabase";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -13,9 +14,22 @@ export default function LoginPage() {
   const [errore, setErrore] = useState("");
   const [caricamento, setCaricamento] = useState(false);
   const [googleCaricamento, setGoogleCaricamento] = useState(false);
+  const [controlloSessione, setControlloSessione] = useState(true);
+
+  useEffect(() => {
+    const sb = creaClientBrowser();
+    sb.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        router.replace("/dashboard");
+      } else {
+        setControlloSessione(false);
+      }
+    });
+  }, [router]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (caricamento) return;
     setErrore("");
     setCaricamento(true);
 
@@ -27,11 +41,12 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    router.replace("/dashboard");
     router.refresh();
   }
 
   async function handleGoogle() {
+    if (googleCaricamento) return;
     setGoogleCaricamento(true);
     const redirectTo = `${window.location.origin}/auth/callback`;
     const { error } = await accediConGoogle(redirectTo);
@@ -39,6 +54,14 @@ export default function LoginPage() {
       setErrore("Errore durante l'accesso con Google.");
       setGoogleCaricamento(false);
     }
+  }
+
+  if (controlloSessione) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <div className="w-6 h-6 border-2 border-[#2D6A4F] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
   }
 
   return (
@@ -55,7 +78,7 @@ export default function LoginPage() {
         </Link>
       </p>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+      <form onSubmit={(e) => void handleSubmit(e)} className="flex flex-col gap-4">
         <div>
           <label
             htmlFor="email"
@@ -107,7 +130,7 @@ export default function LoginPage() {
           style={{ backgroundColor: "#2D6A4F" }}
         >
           {caricamento && <Loader2 size={16} className="animate-spin" />}
-          Accedi
+          {caricamento ? "Accesso in corso…" : "Accedi"}
         </button>
       </form>
 
@@ -121,7 +144,7 @@ export default function LoginPage() {
       </div>
 
       <button
-        onClick={handleGoogle}
+        onClick={() => void handleGoogle()}
         disabled={googleCaricamento}
         className="w-full py-3 rounded-xl font-medium text-sm text-gray-700 border border-gray-200 hover:bg-gray-50 transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >

@@ -102,15 +102,50 @@ function RegistratiInterna() {
   if (successo) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center">
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="flex items-center gap-2">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ backgroundColor: "#2D6A4F", color: "white" }}
+              >
+                {n < 3 ? "✓" : "3"}
+              </div>
+              {n < 3 && <div className="w-8 h-0.5" style={{ backgroundColor: "#2D6A4F" }} />}
+            </div>
+          ))}
+        </div>
+
         <CheckCircle size={48} className="mx-auto mb-4" style={{ color: "#2D6A4F" }} />
-        <h2 className="text-xl font-bold text-gray-900 mb-2">Controlla la tua email</h2>
+        <h2 className="text-xl font-bold text-gray-900 mb-2">
+          {ruolo === "proprietario" ? "Account creato!" : "Controlla la tua email"}
+        </h2>
         <p className="text-sm text-gray-500 mb-6">
-          Abbiamo inviato un link di conferma a{" "}
-          <span className="font-medium text-gray-700">{form.email}</span>.
+          {ruolo === "proprietario" ? (
+            <>
+              Perfetto! Ora configura la tua struttura per renderla visibile sul network viaggi.app.
+            </>
+          ) : (
+            <>
+              Abbiamo inviato un link di conferma a{" "}
+              <span className="font-medium text-gray-700">{form.email}</span>.
+            </>
+          )}
         </p>
-        <Link href="/login" className="text-sm font-medium hover:underline" style={{ color: "#2D6A4F" }}>
-          Torna al login
-        </Link>
+        {ruolo === "proprietario" ? (
+          <Link
+            href="/onboarding-struttura"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ backgroundColor: "#E8956D" }}
+          >
+            🌾 Configura la tua struttura →
+          </Link>
+        ) : (
+          <Link href="/login" className="text-sm font-medium hover:underline" style={{ color: "#2D6A4F" }}>
+            Torna al login
+          </Link>
+        )}
       </div>
     );
   }
@@ -119,6 +154,24 @@ function RegistratiInterna() {
   if (step === 1) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+        {/* Progress */}
+        <div className="flex items-center gap-2 mb-8">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="flex items-center gap-2">
+              <div
+                className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+                style={n === 1
+                  ? { backgroundColor: "#2D6A4F", color: "white" }
+                  : { backgroundColor: "#F3F4F6", color: "#9CA3AF" }}
+              >
+                {n}
+              </div>
+              {n < 3 && <div className="w-8 h-0.5 bg-gray-200" />}
+            </div>
+          ))}
+          <span className="ml-2 text-xs text-gray-400">Passo 1 di 3</span>
+        </div>
+
         <h1 className="text-2xl font-bold text-gray-900 mb-2">Benvenuto</h1>
         <p className="text-sm text-gray-500 mb-8">
           Come vuoi usare agriturismi.app?
@@ -176,6 +229,31 @@ function RegistratiInterna() {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
+      {/* Progress */}
+      <div className="flex items-center gap-2 mb-6">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="flex items-center gap-2">
+            <div
+              className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors"
+              style={n < 2
+                ? { backgroundColor: accent, color: "white" }
+                : n === 2
+                  ? { backgroundColor: accent, color: "white" }
+                  : { backgroundColor: "#F3F4F6", color: "#9CA3AF" }}
+            >
+              {n < 2 ? "✓" : n}
+            </div>
+            {n < 3 && (
+              <div
+                className="w-8 h-0.5 transition-colors"
+                style={{ backgroundColor: n < 2 ? accent : "#E5E7EB" }}
+              />
+            )}
+          </div>
+        ))}
+        <span className="ml-2 text-xs text-gray-400">Passo 2 di 3</span>
+      </div>
+
       {/* Header step 2 */}
       <button
         onClick={() => setStep(1)}

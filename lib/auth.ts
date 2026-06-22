@@ -52,6 +52,12 @@ export async function accediConGoogle(redirectTo: string) {
   const supabase = creaClientBrowser();
   return supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo },
+    options: {
+      redirectTo,
+      queryParams: {
+        access_type: "offline",
+        prompt: "consent",
+      },
+    },
   });
 }

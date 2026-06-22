@@ -1,77 +1,38 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { creaClientBrowser } from "@/lib/supabase";
 
-interface OverpassNode {
-  type: string;
-  id: number;
-  lat: number;
-  lon: number;
-  tags: Record<string, string>;
-}
-
-interface OverpassRisposta {
-  elements: OverpassNode[];
-}
-
-interface Luogo {
-  id: number;
+interface NetworkLuogo {
+  id: string;
   nome: string;
-  distanza: number;
-  lat: number;
-  lon: number;
+  tipo: string;
+  dominio_fonte: string;
+  url_scheda: string;
+  comune: string | null;
+  regione: string | null;
+  distanza_km: number;
 }
 
-function distanzaKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371;
-  const dLat = ((lat2 - lat1) * Math.PI) / 180;
-  const dLon = ((lon2 - lon1) * Math.PI) / 180;
-  const a =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos((lat1 * Math.PI) / 180) *
-      Math.cos((lat2 * Math.PI) / 180) *
-      Math.sin(dLon / 2) ** 2;
-  return R * 2 * Math.asin(Math.sqrt(a));
-}
+const DOMINI_PROSSIMAMENTE: Record<string, { label: string; dominio: string }> = {
+  cantina:    { label: "Cantine",     dominio: "cantine.app" },
+  ristorante: { label: "Ristoranti",  dominio: "ristoranti.app" },
+  attrazione: { label: "Da vedere",   dominio: "viaggi.app" },
+};
 
-async function fetchOverpass(query: string): Promise<OverpassNode[]> {
-  const resp = await fetch("https://overpass-api.de/api/interpreter", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `data=${encodeURIComponent(query)}`,
-    signal: AbortSignal.timeout(10000),
-  });
-  const d = (await resp.json()) as OverpassRisposta;
-  return d.elements ?? [];
-}
-
-function toLuoghi(nodes: OverpassNode[], lat: number, lng: number, max: number): Luogo[] {
-  return nodes
-    .filter((n) => n.tags?.name)
-    .map((n) => ({
-      id: n.id,
-      nome: n.tags.name,
-      distanza: distanzaKm(lat, lng, n.lat, n.lon),
-      lat: n.lat,
-      lon: n.lon,
-    }))
-    .sort((a, b) => a.distanza - b.distanza)
-    .slice(0, max);
-}
+const CATEGORIE = [
+  { tipo: "cantina",    emoji: "🍷", titolo: "Cantine",    dominio: "cantine.app"    },
+  { tipo: "ristorante", emoji: "🍽️", titolo: "Ristoranti", dominio: "ristoranti.app" },
+  { tipo: "attrazione", emoji: "🏛️", titolo: "Da vedere",  dominio: "viaggi.app"     },
+];
 
 function CardLuoghi({
-  emoji,
-  titolo,
-  luoghi,
-  linkLabel,
-  linkHref,
-  loading,
+  emoji, titolo, luoghi, dominio, loading,
 }: {
   emoji: string;
   titolo: string;
-  luoghi: Luogo[];
-  linkLabel: string;
-  linkHref: string;
+  luoghi: NetworkLuogo[];
+  dominio: string;
   loading: boolean;
 }) {
   return (
@@ -88,16 +49,25 @@ function CardLuoghi({
           ))}
         </div>
       ) : luoghi.length === 0 ? (
-        <p className="text-xs text-gray-400">Nessuno trovato nelle vicinanze.</p>
+        <p className="text-xs text-gray-400">
+          Prossimamente su <span className="font-medium">{dominio}</span>
+        </p>
       ) : (
         <ul className="flex flex-col gap-2">
-          {luoghi.map((l) => (
+          {luoghi.slice(0, 3).map((l) => (
             <li key={l.id} className="flex items-center justify-between gap-2 text-sm">
-              <span className="text-gray-700 truncate">{l.nome}</span>
+              <a
+                href={l.url_scheda}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-700 truncate hover:text-[#2D6A4F] transition-colors"
+              >
+                {l.nome}
+              </a>
               <span className="text-xs text-gray-400 shrink-0">
-                {l.distanza < 1
-                  ? `${Math.round(l.distanza * 1000)} m`
-                  : `${l.distanza.toFixed(1)} km`}
+                {l.distanza_km < 1
+                  ? `${Math.round(l.distanza_km * 1000)} m`
+                  : `${l.distanza_km.toFixed(1)} km`}
               </span>
             </li>
           ))}
@@ -105,44 +75,44 @@ function CardLuoghi({
       )}
 
       <a
-        href={linkHref}
+        href={`https://${dominio}`}
         target="_blank"
         rel="noopener noreferrer"
         className="mt-auto text-xs font-semibold text-[#2D6A4F] hover:underline"
       >
-        {linkLabel} →
+        Vedi su {dominio} →
       </a>
     </div>
   );
 }
 
 export default function NelleVicinanze({ lat, lng }: { lat: number; lng: number }) {
-  const [cantine, setCantine] = useState<Luogo[]>([]);
-  const [ristoranti, setRistoranti] = useState<Luogo[]>([]);
-  const [attrazioni, setAttrazioni] = useState<Luogo[]>([]);
+  const [perTipo, setPerTipo] = useState<Record<string, NetworkLuogo[]>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const sb = creaClientBrowser();
+
     async function carica() {
       try {
-        const [cNodes, rNodes, aNodes] = await Promise.allSettled([
-          fetchOverpass(
-            `[out:json][timeout:8];node["amenity"="winery"]["name"](around:20000,${lat},${lng});out body 10;`
-          ),
-          fetchOverpass(
-            `[out:json][timeout:8];node["amenity"="restaurant"]["name"](around:5000,${lat},${lng});out body 10;`
-          ),
-          fetchOverpass(
-            `[out:json][timeout:8];node["tourism"="attraction"]["name"](around:15000,${lat},${lng});out body 10;`
-          ),
-        ]);
+        const { data } = await sb.rpc("network_luoghi_vicini", {
+          lat_utente: lat,
+          lng_utente: lng,
+          raggio_km: 20,
+        }) as { data: NetworkLuogo[] | null };
 
-        if (cNodes.status === "fulfilled") setCantine(toLuoghi(cNodes.value, lat, lng, 3));
-        if (rNodes.status === "fulfilled") setRistoranti(toLuoghi(rNodes.value, lat, lng, 3));
-        if (aNodes.status === "fulfilled") setAttrazioni(toLuoghi(aNodes.value, lat, lng, 3));
-      } catch { /* silently ignore */ }
+        if (data) {
+          const grouped: Record<string, NetworkLuogo[]> = {};
+          for (const l of data) {
+            if (!grouped[l.tipo]) grouped[l.tipo] = [];
+            grouped[l.tipo].push(l);
+          }
+          setPerTipo(grouped);
+        }
+      } catch { /* ignora errori di rete */ }
       setLoading(false);
     }
+
     void carica();
   }, [lat, lng]);
 
@@ -156,34 +126,20 @@ export default function NelleVicinanze({ lat, lng }: { lat: number; lng: number 
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4">
-        <CardLuoghi
-          emoji="🍷"
-          titolo="Cantine"
-          luoghi={cantine}
-          linkLabel="Vedi su cantine.app"
-          linkHref="https://cantine.app"
-          loading={loading}
-        />
-        <CardLuoghi
-          emoji="🍽️"
-          titolo="Ristoranti"
-          luoghi={ristoranti}
-          linkLabel="Vedi su ristoranti.app"
-          linkHref="https://ristoranti.app"
-          loading={loading}
-        />
-        <CardLuoghi
-          emoji="🏛️"
-          titolo="Da vedere"
-          luoghi={attrazioni}
-          linkLabel="Pianifica con viaggi.app"
-          linkHref="https://viaggi.app"
-          loading={loading}
-        />
+        {CATEGORIE.map(({ tipo, emoji, titolo, dominio }) => (
+          <CardLuoghi
+            key={tipo}
+            emoji={emoji}
+            titolo={titolo}
+            luoghi={perTipo[tipo] ?? []}
+            dominio={dominio}
+            loading={loading}
+          />
+        ))}
       </div>
 
       <p className="text-[10px] text-gray-300 mt-4 text-center">
-        Powered by viaggi.app network · Dati: OpenStreetMap
+        Powered by viaggi.app network
       </p>
     </section>
   );

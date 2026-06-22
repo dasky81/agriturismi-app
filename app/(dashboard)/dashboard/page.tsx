@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Heart, Search, Home, User, LogOut, ChevronRight, MapPin } from "lucide-react";
+import { Heart, Search, Home, User, LogOut, ChevronRight, MapPin, Globe, Star, BarChart2, Settings } from "lucide-react";
 import { creaClientBrowser } from "@/lib/supabase";
 
 interface ProfiloUtente {
@@ -38,6 +38,17 @@ interface StrutturaUtente {
   nome: string;
   slug: string;
   verificato: boolean;
+  regione: string | null;
+  tot_recensioni: number | null;
+  tot_consigli: number | null;
+}
+
+interface RecensionePreview {
+  id: string;
+  voto: string;
+  titolo: string;
+  testo: string;
+  created_at: string;
 }
 
 export default function DashboardPage() {
@@ -45,6 +56,7 @@ export default function DashboardPage() {
   const [preferiti, setPreferiti] = useState<Preferito[]>([]);
   const [ricerche, setRicerche] = useState<Ricerca[]>([]);
   const [struttura, setStruttura] = useState<StrutturaUtente | null>(null);
+  const [recensioniPreview, setRecensioniPreview] = useState<RecensionePreview[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
   const [profileSaved, setProfileSaved] = useState(false);
@@ -93,10 +105,21 @@ export default function DashboardPage() {
       if (prof?.ruolo === "proprietario" || prof?.ruolo === "admin") {
         const { data: strutt } = await sb
           .from("agriturismi")
-          .select("id, nome, slug, verificato")
+          .select("id, nome, slug, verificato, regione, tot_recensioni, tot_consigli")
           .eq("proprietario_id", user.id)
           .maybeSingle();
-        if (strutt) setStruttura(strutt as StrutturaUtente);
+        if (strutt) {
+          setStruttura(strutt as StrutturaUtente);
+          // Carica ultime 3 recensioni moderate
+          const { data: recs } = await sb
+            .from("recensioni")
+            .select("id, voto, titolo, testo, created_at")
+            .eq("agriturismo_id", strutt.id)
+            .eq("moderata", true)
+            .order("created_at", { ascending: false })
+            .limit(3);
+          if (recs) setRecensioniPreview(recs as RecensionePreview[]);
+        }
       }
 
       setLoading(false);
@@ -243,60 +266,160 @@ export default function DashboardPage() {
 
       {/* 3. La mia struttura (solo proprietario/admin) */}
       {(profilo?.ruolo === "proprietario" || profilo?.ruolo === "admin") && (
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
-            <Home size={16} className="text-[#2D6A4F]" />
-            La mia struttura
-          </h2>
+        <>
           {struttura ? (
             <>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-gray-900">{struttura.nome}</p>
-                  <span
-                    className={`inline-block mt-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                      struttura.verificato
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {struttura.verificato ? "✓ Verificata" : "⏳ In attesa di verifica"}
-                  </span>
-                </div>
-                <Link
-                  href={`/agriturismo/${struttura.slug}`}
-                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                  style={{ backgroundColor: "#2D6A4F" }}
-                >
-                  Vedi scheda
-                  <ChevronRight size={14} />
-                </Link>
-              </div>
-              {profilo?.ruolo === "proprietario" && (
-                <div className="mt-3 pt-3 border-t border-gray-50">
+              {/* Struttura header */}
+              <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="min-w-0">
+                    <h2 className="font-bold text-gray-900 text-base truncate">{struttura.nome}</h2>
+                    {struttura.regione && (
+                      <p className="text-xs text-gray-400 flex items-center gap-1 mt-0.5">
+                        <MapPin size={10} />
+                        {struttura.regione}
+                      </p>
+                    )}
+                    <span
+                      className={`inline-block mt-2 text-[11px] px-2 py-0.5 rounded-full font-medium ${
+                        struttura.verificato
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {struttura.verificato ? "✓ Verificata" : "⏳ In attesa di verifica"}
+                    </span>
+                  </div>
                   <Link
-                    href="/dashboard/analytics"
-                    className="flex items-center gap-2 text-sm font-medium text-[#2D6A4F] hover:underline"
+                    href={`/agriturismo/${struttura.slug}`}
+                    className="shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
+                    style={{ backgroundColor: "#2D6A4F" }}
                   >
-                    📊 Le mie statistiche →
+                    Vedi scheda
+                    <ChevronRight size={14} />
                   </Link>
                 </div>
+
+                {/* KPI */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-gray-50 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold text-gray-900">{struttura.tot_recensioni ?? 0}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Recensioni</p>
+                  </div>
+                  <div className="bg-gray-50 rounded-xl p-3 text-center">
+                    <p className="text-2xl font-bold" style={{ color: "#2D6A4F" }}>
+                      {struttura.tot_recensioni
+                        ? Math.round(((struttura.tot_consigli ?? 0) / struttura.tot_recensioni) * 100)
+                        : 0}%
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">Consigliano</p>
+                  </div>
+                </div>
+
+                {/* Azioni rapide */}
+                <div className="mt-4 pt-4 border-t border-gray-50 flex flex-wrap gap-2">
+                  {[
+                    { href: "/dashboard/analytics", icon: BarChart2, label: "Statistiche" },
+                    { href: "/onboarding-struttura", icon: Settings, label: "Configura" },
+                    { href: "/itinerario", icon: Globe, label: "Itinerario AI" },
+                  ].map(({ href, icon: Icon, label }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors"
+                    >
+                      <Icon size={12} />
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+
+              {/* Recensioni recenti */}
+              {recensioniPreview.length > 0 && (
+                <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                  <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                    <Star size={16} className="text-[#E8956D]" />
+                    Recensioni recenti
+                  </h2>
+                  <div className="flex flex-col divide-y divide-gray-50">
+                    {recensioniPreview.map((r) => (
+                      <div key={r.id} className="py-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className={`text-xs font-semibold ${r.voto === "consiglio" ? "text-green-600" : "text-red-500"}`}>
+                            {r.voto === "consiglio" ? "👍 Consiglia" : "👎 Non consiglia"}
+                          </span>
+                          <span className="text-xs text-gray-300">·</span>
+                          <span className="text-xs text-gray-400">
+                            {new Date(r.created_at).toLocaleDateString("it-IT", { day: "numeric", month: "short" })}
+                          </span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-800">{r.titolo}</p>
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{r.testo}</p>
+                      </div>
+                    ))}
+                  </div>
+                  <Link
+                    href={`/agriturismo/${struttura.slug}#recensioni`}
+                    className="flex items-center gap-1 mt-3 text-xs font-semibold text-[#2D6A4F] hover:underline"
+                  >
+                    Vedi tutte →
+                  </Link>
+                </section>
               )}
+
+              {/* Presenza nel network */}
+              <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+                <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-3">
+                  <Globe size={16} className="text-[#2D6A4F]" />
+                  Presenza nel network viaggi.app
+                </h2>
+                <p className="text-xs text-gray-500 mb-4">
+                  La tua struttura è automaticamente visibile su questi portali del network.
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: "agriturismi.app", href: `https://www.agriturismi.app/agriturismo/${struttura.slug}`, attivo: true },
+                    { label: "soggiorni.app", href: "https://soggiorni.app", attivo: false },
+                    { label: "viaggi.app", href: "https://viaggi.app", attivo: true },
+                  ].map(({ label, href, attivo }) => (
+                    <a
+                      key={label}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors"
+                      style={attivo
+                        ? { borderColor: "#2D6A4F", color: "#2D6A4F", backgroundColor: "#F0FDF4" }
+                        : { borderColor: "#E5E7EB", color: "#9CA3AF" }}
+                    >
+                      {attivo ? "✓" : "○"} {label}
+                    </a>
+                  ))}
+                </div>
+              </section>
             </>
           ) : (
-            <div className="text-center py-4">
-              <p className="text-sm text-gray-500 mb-3">Nessuna struttura collegata al tuo account</p>
-              <Link
-                href="/aggiungi-struttura"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold text-white"
-                style={{ backgroundColor: "#2D6A4F" }}
-              >
-                <Home size={14} />
-                Aggiungi il tuo agriturismo
-              </Link>
-            </div>
+            <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
+              <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2 mb-4">
+                <Home size={16} className="text-[#2D6A4F]" />
+                La mia struttura
+              </h2>
+              <div className="text-center py-4">
+                <p className="text-2xl mb-2">🌾</p>
+                <p className="text-sm text-gray-500 mb-4">Nessuna struttura collegata al tuo account</p>
+                <Link
+                  href="/onboarding-struttura"
+                  className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                  style={{ backgroundColor: "#2D6A4F" }}
+                >
+                  <Home size={14} />
+                  Aggiungi il tuo agriturismo
+                </Link>
+              </div>
+            </section>
           )}
-        </section>
+        </>
       )}
 
       {/* 4. Il mio profilo */}
