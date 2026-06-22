@@ -27,6 +27,12 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
   },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: "/apple-icon.svg",
+  },
   openGraph: {
     type: "website",
     siteName: "agriturismi.app",
@@ -35,12 +41,21 @@ export const metadata: Metadata = {
     title: "agriturismi.app — Motore di ricerca AI per agriturismi italiani",
     description:
       "Trova l'agriturismo perfetto in Italia con la ricerca in linguaggio naturale.",
+    images: [
+      {
+        url: "/opengraph-image.svg",
+        width: 1200,
+        height: 630,
+        alt: "agriturismi.app — Motore di ricerca AI per agriturismi italiani",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "agriturismi.app — Motore di ricerca AI per agriturismi italiani",
     description:
       "Trova l'agriturismo perfetto in Italia con la ricerca in linguaggio naturale.",
+    images: ["/opengraph-image.svg"],
   },
   robots: {
     index: true,

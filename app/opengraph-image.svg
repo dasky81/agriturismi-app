@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1B4332"/>
+      <stop offset="100%" stop-color="#2D6A4F"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#52B788"/>
+      <stop offset="100%" stop-color="#40916C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle texture dots -->
+  <circle cx="100" cy="100" r="200" fill="#52B788" opacity="0.04"/>
+  <circle cx="1100" cy="530" r="250" fill="#52B788" opacity="0.06"/>
+  <circle cx="200" cy="550" r="150" fill="#52B788" opacity="0.03"/>
+
+  <!-- Leaf icon centered -->
+  <g transform="translate(540, 120)">
+    <rect width="120" height="120" rx="28" fill="#2D6A4F"/>
+    <path d="M60 14C60 14 30 36 30 67C30 83 43 96 60 96C77 96 90 83 90 67C90 36 60 14 60 14Z" fill="url(#leaf)"/>
+    <path d="M60 14C60 14 60 60 60 96" stroke="#2D6A4F" stroke-width="5" stroke-linecap="round"/>
+    <path d="M60 44C60 44 44 55 37 67" stroke="#2D6A4F" stroke-width="3.5" stroke-linecap="round" opacity="0.5"/>
+    <path d="M60 56C60 56 76 67 83 79" stroke="#2D6A4F" stroke-width="3.5" stroke-linecap="round" opacity="0.5"/>
+  </g>
+
+  <!-- Main title -->
+  <text
+    x="600"
+    y="310"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="72"
+    font-weight="700"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-1"
+  >agriturismi.app</text>
+
+  <!-- Subtitle -->
+  <text
+    x="600"
+    y="385"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="28"
+    font-weight="400"
+    fill="#52B788"
+    text-anchor="middle"
+    letter-spacing="0.3"
+  >Motore di ricerca AI per agriturismi italiani</text>
+
+  <!-- Bottom decorative line -->
+  <rect x="480" y="430" width="240" height="2" rx="1" fill="#52B788" opacity="0.4"/>
+
+  <!-- Bottom tagline -->
+  <text
+    x="600"
+    y="490"
+    font-family="system-ui, -apple-system, sans-serif"
+    font-size="20"
+    font-weight="400"
+    fill="white"
+    text-anchor="middle"
+    opacity="0.6"
+  >Toscana · Umbria · Sicilia · Puglia · e tutta Italia</text>
+</svg>
