@@ -51,16 +51,21 @@ export default function AdminBlog() {
 
   async function generaArticoli() {
     setGenerando(true);
-    setMsgGenera("Generazione in corso (3-4 minuti)…");
+    setMsgGenera("Generazione in corso (~30 secondi)…");
     try {
       const res = await fetch("/api/genera-articoli-seed", {
         headers: { "x-seed-secret": "agriturismi2026" },
       });
-      const dati = await res.json() as { salvati: number; totale: number };
-      setMsgGenera(`✅ ${dati.salvati}/${dati.totale} articoli generati e salvati`);
+      const dati = await res.json() as { salvati?: number; totale?: number; errore?: string };
+      if (!res.ok) {
+        setMsgGenera(`❌ ${dati.errore ?? `Errore HTTP ${res.status}`}`);
+        return;
+      }
+      setMsgGenera(`✅ ${dati.salvati ?? 0}/${dati.totale ?? 0} articoli generati e salvati`);
       void carica();
-    } catch {
-      setMsgGenera("❌ Errore durante la generazione");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Errore di rete";
+      setMsgGenera(`❌ ${msg}`);
     } finally {
       setGenerando(false);
     }

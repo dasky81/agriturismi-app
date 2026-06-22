@@ -103,16 +103,33 @@ async function generaArticolo(client: Anthropic, titolo: string): Promise<Artico
   };
 }
 
+// Timeout esteso per Vercel (richiede piano Pro — su Hobby il max è 60s)
+export const maxDuration = 300;
+
 export async function GET(req: NextRequest) {
+  // Debug iniziale — visibile nei log Vercel
+  console.log("[genera-articoli-seed] ENV:", process.env.NODE_ENV);
+  console.log("[genera-articoli-seed] SECRET ricevuto:", req.headers.get("x-seed-secret"));
+  console.log("[genera-articoli-seed] SERVICE_KEY:", process.env.SUPABASE_SERVICE_ROLE_KEY ? "presente" : "MANCANTE");
+  console.log("[genera-articoli-seed] ANTHROPIC_KEY:", process.env.ANTHROPIC_API_KEY ? "presente" : "MANCANTE");
+
+  // Protezione solo tramite secret — funziona in dev e produzione
   const secret = req.headers.get("x-seed-secret");
-  if (process.env.NODE_ENV !== "development" && secret !== SEED_SECRET) {
+  if (secret !== SEED_SECRET) {
     return NextResponse.json({ errore: "Non autorizzato" }, { status: 401 });
   }
 
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!serviceKey) {
     return NextResponse.json(
-      { errore: "SUPABASE_SERVICE_ROLE_KEY non impostata — necessaria per bypassare le RLS" },
+      { errore: "SUPABASE_SERVICE_ROLE_KEY non impostata — aggiungila in Vercel → Settings → Environment Variables" },
+      { status: 500 }
+    );
+  }
+
+  if (!process.env.ANTHROPIC_API_KEY) {
+    return NextResponse.json(
+      { errore: "ANTHROPIC_API_KEY non impostata — aggiungila in Vercel → Settings → Environment Variables" },
       { status: 500 }
     );
   }
@@ -124,17 +141,11 @@ export async function GET(req: NextRequest) {
     serviceKey
   );
 
-  const risultati: Array<{
-    titolo: string;
-    slug: string;
-    salvato: boolean;
-    errore?: string;
-  }> = [];
-
-  for (const titolo of TITOLI) {
+  // Genera tutti gli articoli in parallelo (da ~150s sequenziale a ~30s parallelo)
+  const jobs = TITOLI.map(async (titolo) => {
     const slug = slugify(titolo);
     try {
-      console.log(`[genera-articoli-seed] Generando: "${titolo}"...`);
+      console.log(`[genera-articoli-seed] Avvio: "${titolo}"`);
       const articolo = await generaArticolo(claude, titolo);
 
       const { error } = await supabase.from("post").upsert(
@@ -156,18 +167,19 @@ export async function GET(req: NextRequest) {
       );
 
       if (error) {
-        console.error(`[genera-articoli-seed] Errore Supabase per "${titolo}":`, error);
-        risultati.push({ titolo, slug, salvato: false, errore: error.message });
-      } else {
-        console.log(`[genera-articoli-seed] Salvato: "${titolo}"`);
-        risultati.push({ titolo, slug, salvato: true });
+        console.error(`[genera-articoli-seed] Errore Supabase "${titolo}":`, error.message);
+        return { titolo, slug, salvato: false, errore: error.message };
       }
+      console.log(`[genera-articoli-seed] Salvato: "${titolo}"`);
+      return { titolo, slug, salvato: true };
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      console.error(`[genera-articoli-seed] Errore per "${titolo}":`, msg);
-      risultati.push({ titolo, slug, salvato: false, errore: msg });
+      console.error(`[genera-articoli-seed] Errore "${titolo}":`, msg);
+      return { titolo, slug, salvato: false, errore: msg };
     }
-  }
+  });
+
+  const risultati = await Promise.all(jobs);
 
   const salvati = risultati.filter((r) => r.salvato).length;
   return NextResponse.json({
