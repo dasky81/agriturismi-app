@@ -5,6 +5,14 @@ import Link from "next/link";
 import { ToggleLeft, ToggleRight, Trash2, ExternalLink, Sparkles, Loader2 } from "lucide-react";
 import { creaClientBrowser } from "@/lib/supabase";
 
+const TITOLI_SEED = [
+  "I migliori agriturismi in Toscana: guida completa 2026",
+  "Agriturismo con piscina: le migliori strutture in Italia",
+  "Agriturismi per famiglie con bambini: cosa cercare",
+  "Weekend romantico in agriturismo: idee e consigli",
+  "Degustazione vini in agriturismo: le regioni migliori",
+];
+
 interface Post {
   id: string;
   titolo: string;
@@ -51,24 +59,36 @@ export default function AdminBlog() {
 
   async function generaArticoli() {
     setGenerando(true);
-    setMsgGenera("Generazione in corso (~30 secondi)…");
-    try {
-      const res = await fetch("/api/genera-articoli-seed", {
-        headers: { "x-seed-secret": "agriturismi2026" },
-      });
-      const dati = await res.json() as { salvati?: number; totale?: number; errore?: string };
-      if (!res.ok) {
-        setMsgGenera(`❌ ${dati.errore ?? `Errore HTTP ${res.status}`}`);
+    let salvati = 0;
+
+    for (let i = 0; i < TITOLI_SEED.length; i++) {
+      const titolo = TITOLI_SEED[i];
+      setMsgGenera(`Generando articolo ${i + 1}/${TITOLI_SEED.length}: "${titolo.slice(0, 40)}…"`);
+      try {
+        const res = await fetch("/api/genera-articolo", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ titolo, secret: "agriturismi2026" }),
+        });
+        const dati = await res.json() as { ok?: boolean; errore?: string };
+        if (res.ok && dati.ok) {
+          salvati++;
+        } else {
+          setMsgGenera(`❌ Articolo ${i + 1}: ${dati.errore ?? `Errore HTTP ${res.status}`}`);
+          setGenerando(false);
+          return;
+        }
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : "Errore di rete";
+        setMsgGenera(`❌ Articolo ${i + 1}: ${msg}`);
+        setGenerando(false);
         return;
       }
-      setMsgGenera(`✅ ${dati.salvati ?? 0}/${dati.totale ?? 0} articoli generati e salvati`);
-      void carica();
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Errore di rete";
-      setMsgGenera(`❌ ${msg}`);
-    } finally {
-      setGenerando(false);
     }
+
+    setMsgGenera(`✅ ${salvati}/${TITOLI_SEED.length} articoli generati e salvati`);
+    setGenerando(false);
+    void carica();
   }
 
   return (
